@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Rizky Pratama — Fullstack Developer",
-  description: "Portfolio of Rizky Pratama, a Fullstack Developer from Surabaya specializing in React, Next.js, and AI-powered applications.",
-  keywords: ["fullstack developer", "next.js", "react", "surabaya", "portfolio"],
-  authors: [{ name: "Rizky Pratama" }],
+  title: "Fali Irham Maulana — Portfolio",
+  description: "Portfolio of Fali Irham Maulana, a Student from Malang specializing in React, Next.js, and AI-powered applications.",
+  keywords: ["student", "next.js", "react", "malang", "portfolio"],
+  authors: [{ name: "Fali Irham Maulana" }],
   openGraph: {
-    title: "Rizky Pratama — Fullstack Developer",
+    title: "Fali Irham Maulana — Portfolio",
     description: "Building digital products that matter.",
     type: "website",
   },
