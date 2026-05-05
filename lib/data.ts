@@ -142,4 +142,18 @@ export const experiences = [
   }
 ];
 
-export const certifications = [];
+export type Certification = {
+  title: string;
+  issuer: string;
+  year: string;
+  credentialUrl: string;
+};
+
+export const certifications: Certification[] = [
+  {
+    title: "Building LLM Applications With Prompt Engineering",
+    issuer: "Nvdia",
+    year: "2025",
+    credentialUrl: "#",
+  },
+];
