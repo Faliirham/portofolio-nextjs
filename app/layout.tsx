@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   description: "Full-Stack Developer & AI Engineer from Malang, Indonesia. Building scalable systems with data & intelligence.",
   keywords: ["student", "next.js", "react", "malang", "portfolio", "full-stack", "AI", "developer"],
   authors: [{ name: "Fali Irham Maulana" }],
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
     title: "Fali Irham Maulana — Portfolio",
     description: "Full-Stack Developer & AI Engineer. Building scalable systems with data & intelligence.",
