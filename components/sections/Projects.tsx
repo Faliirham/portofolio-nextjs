@@ -108,7 +108,7 @@ function ProjectCard({
             style={{
               position: "relative",
               width: "100%",
-              height: large ? "180px" : "120px",
+              height: large ? "clamp(120px, 25vw, 180px)" : "clamp(80px, 18vw, 120px)",
               borderRadius: "2px",
               overflow: "hidden",
               background: "var(--bg-secondary)",

@@ -1,13 +1,22 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 
 export default function CheckeredTransition() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-20%" });
+  const [cols, setCols] = useState(20);
+
+  useEffect(() => {
+    const updateCols = () => {
+      setCols(window.innerWidth < 640 ? 10 : window.innerWidth < 1024 ? 14 : 20);
+    };
+    updateCols();
+    window.addEventListener("resize", updateCols);
+    return () => window.removeEventListener("resize", updateCols);
+  }, []);
 
   const rows = 3;
-  const cols = 20;
 
   return (
     <div

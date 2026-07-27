@@ -379,9 +379,10 @@ export default function Hero({ config }: { config: Config }) {
 
             {/* Race stats grid */}
             <div
+              className="stats-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
+                gridTemplateColumns: "repeat(2, 1fr)",
                 gap: "1px",
                 width: "100%",
                 maxWidth: "340px",
@@ -397,7 +398,7 @@ export default function Hero({ config }: { config: Config }) {
                   <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.8rem, 2vw, 1rem)", color: "var(--red-light)" }}>
                     {s.value}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "clamp(0.4rem, 1vw, 0.5rem)", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "clamp(0.55rem, 1.2vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     {s.label}
                   </p>
                 </div>

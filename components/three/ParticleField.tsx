@@ -60,6 +60,17 @@ function Particles({ count = 150 }: { count?: number }) {
 }
 
 export default function ParticleField() {
+  const [particleCount, setParticleCount] = useState(120);
+
+  useEffect(() => {
+    const updateCount = () => {
+      setParticleCount(window.innerWidth < 768 ? 40 : 120);
+    };
+    updateCount();
+    window.addEventListener("resize", updateCount);
+    return () => window.removeEventListener("resize", updateCount);
+  }, []);
+
   return (
     <div
       style={{
@@ -75,7 +86,7 @@ export default function ParticleField() {
         gl={{ antialias: false, alpha: true }}
         style={{ background: "transparent" }}
       >
-        <Particles count={120} />
+        <Particles count={particleCount} />
       </Canvas>
     </div>
   );

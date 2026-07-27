@@ -95,9 +95,10 @@ function Scene() {
 export default function SkillGraph() {
   return (
     <div
+      className="skill-graph-container"
       style={{
         width: "100%",
-        height: "300px",
+        height: "clamp(200px, 40vw, 300px)",
         borderRadius: "4px",
         overflow: "hidden",
         border: "1px solid var(--border)",

@@ -7,7 +7,7 @@ import type { SkillsSection } from "@/lib/types";
 const SkillGraph = dynamic(() => import("@/components/three/SkillGraph"), {
   ssr: false,
   loading: () => (
-    <div style={{ width: "100%", height: "300px", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-card)" }} />
+    <div style={{ width: "100%", height: "clamp(200px, 40vw, 300px)", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-card)" }} />
   ),
 });
 

@@ -164,3 +164,12 @@ h1, h2, h3, h4, h5 {
 .animate-pulse-race {
   animation: pulse-race 2s ease-in-out infinite;
 }
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  .spotify-embed-wrapper {
+    padding-bottom: 100% !important;
+  }
+}

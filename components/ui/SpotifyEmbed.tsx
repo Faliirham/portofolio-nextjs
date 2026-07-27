@@ -15,7 +15,7 @@ export default function SpotifyEmbed({ url }: SpotifyEmbedProps) {
         background: "var(--bg-card)",
       }}
     >
-      <div style={{ position: "relative", paddingBottom: "100%" }}>
+      <div className="spotify-embed-wrapper" style={{ position: "relative", paddingBottom: "clamp(80%, 100vw - 3rem, 100%)" }}>
         <iframe
           src={url}
           style={{
