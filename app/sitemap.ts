@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://faliirham.dev";
+export const dynamic = "force-static";
+
+const BASE_URL = "https://faliirham.pages.dev";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

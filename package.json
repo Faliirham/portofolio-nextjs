@@ -5,16 +5,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "preview": "next build && wrangler pages deploy out --project-name=faliirham",
+    "deploy": "next build && wrangler pages deploy out --project-name=faliirham",
     "lint": "eslint"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "framer-motion": "^12.38.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.14.0",
-    "next": "16.2.4",
+    "next": "^16.2.12",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -26,8 +28,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "^16.2.12",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.114.0"
   }
 }

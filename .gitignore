@@ -5,6 +5,7 @@
 /.pnp
 .pnp.*
 .yarn/*
+.opencode/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -12,7 +13,6 @@
 
 # testing
 /coverage
-
 # next.js
 /.next/
 /out/
@@ -35,6 +35,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# cloudflare
+.open-next
 
 # typescript
 *.tsbuildinfo

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Fali Irham Maulana — Portfolio",
     description: "Full-Stack Developer & AI Engineer. Building scalable systems with data & intelligence.",
-    url: "https://faliirham.dev",
+    url: "https://faliirham.pages.dev",
     siteName: "Fali Irham Maulana",
     type: "website",
     locale: "en_US",
