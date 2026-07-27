@@ -174,7 +174,5 @@ h1, h2, h3, h4, h5 {
   .stats-grid {
     grid-template-columns: repeat(4, 1fr) !important;
   }
-  .spotify-embed-wrapper {
-    padding-bottom: 100% !important;
-  }
+
 }

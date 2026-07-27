@@ -156,7 +156,6 @@ export function getContactSection(): ContactSection {
     title: d.title as string,
     subtitle: d.subtitle as string,
     availabilityBadge: d.availabilityBadge as string,
-    spotifyEmbed: d.spotifyEmbed as string,
     contactLinks: d.contactLinks as ContactSection["contactLinks"],
     content,
     image: resolveImage("contact", d.image as string | undefined),

@@ -115,7 +115,6 @@ export interface ContactSection {
   title: string;
   subtitle: string;
   availabilityBadge: string;
-  spotifyEmbed: string;
   contactLinks: SocialLink[];
   content: string;
   image?: string;

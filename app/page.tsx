@@ -6,7 +6,6 @@ import Projects from "@/components/sections/Projects";
 import Experience from "@/components/sections/Experience";
 import Certifications from "@/components/sections/Certifications";
 import Contact from "@/components/sections/Contact";
-import MusicPlaylist from "@/components/sections/MusicPlaylist";
 import CursorTrail from "@/components/ui/CursorTrail";
 import CheckeredTransition from "@/components/ui/CheckeredTransition";
 import {
@@ -44,8 +43,6 @@ export default function Home() {
         <Experience section={experience} />
         <CheckeredTransition />
         <Certifications section={certifications} />
-        <CheckeredTransition />
-        <MusicPlaylist spotifyEmbed={contact.spotifyEmbed} />
         <CheckeredTransition />
         <Contact section={contact} config={config} />
       </main>

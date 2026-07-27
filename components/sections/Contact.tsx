@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
 import { ArrowUpRight, Mail } from "lucide-react";
-import { GithubIcon, LinkedinIcon, WhatsappIcon, InstagramIcon } from "@/components/ui/icons";
+import { GithubIcon, LinkedinIcon, WhatsappIcon, InstagramIcon, SpotifyIcon } from "@/components/ui/icons";
 import type { ContactSection, Config } from "@/lib/types";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -12,6 +12,7 @@ const iconMap: Record<string, React.ReactNode> = {
   github: <GithubIcon size={18} />,
   linkedin: <LinkedinIcon size={18} />,
   instagram: <InstagramIcon size={18} />,
+  spotify: <SpotifyIcon size={18} />,
   whatsapp: <WhatsappIcon size={18} />,
 };
 
