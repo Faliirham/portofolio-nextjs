@@ -1,5 +1,7 @@
 "use client";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
@@ -13,6 +15,23 @@ const ParticleField = dynamic(() => import("@/components/three/ParticleField"), 
 });
 
 export default function Hero({ config }: { config: Config }) {
+  const nameRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    import("gsap").then(({ gsap }) => {
+      if (nameRef.current) {
+        gsap.from(nameRef.current, {
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          delay: 0.4,
+        });
+      }
+    });
+  }, []);
+
   return (
     <section
       id="hero"
@@ -121,6 +140,7 @@ export default function Hero({ config }: { config: Config }) {
             >
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
                 <h1
+                  ref={nameRef}
                   style={{
                     fontFamily: 'var(--font-orbitron), sans-serif',
                     fontSize: "clamp(2.2rem, 7vw, 5rem)",
@@ -336,10 +356,10 @@ export default function Hero({ config }: { config: Config }) {
                 {/* Avatar */}
                 <div
                   style={{
-                    width: "clamp(80px, 20vw, 100px)",
-                    height: "clamp(80px, 20vw, 100px)",
+                    width: "clamp(100px, 25vw, 220px)",
+                    height: "clamp(100px, 25vw, 220px)",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, var(--red) 0%, #7f1d1d 100%)",
+                    background: config.avatar ? "transparent" : "linear-gradient(135deg, var(--red) 0%, #7f1d1d 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -351,9 +371,20 @@ export default function Hero({ config }: { config: Config }) {
                     boxShadow: "0 0 40px var(--red-glow)",
                     position: "relative",
                     zIndex: 1,
+                    overflow: "hidden",
                   }}
                 >
-                  FI
+                  {config.avatar ? (
+                    <Image
+                      src={config.avatar}
+                      alt={config.name}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="220px"
+                    />
+                  ) : (
+                    "FI"
+                  )}
                 </div>
                 <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
                   <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.75rem, 2vw, 0.9rem)", letterSpacing: "0.05em" }}>

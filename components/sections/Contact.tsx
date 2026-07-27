@@ -1,5 +1,7 @@
 "use client";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { GithubIcon, LinkedinIcon, WhatsappIcon, InstagramIcon } from "@/components/ui/icons";
@@ -14,6 +16,24 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function Contact({ section, config }: { section: ContactSection; config: Config }) {
+  const photoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !section.image || !photoRef.current) return;
+    import("@/lib/gsap").then(({ gsap }) => {
+      gsap.to(photoRef.current, {
+        y: -20,
+        ease: "none",
+        scrollTrigger: {
+          trigger: photoRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+  }, [section.image]);
+
   const contacts = section.contactLinks.map((c) => ({
     ...c,
     icon: iconMap[c.icon] || <Mail size={18} />,
@@ -32,7 +52,27 @@ export default function Contact({ section, config }: { section: ContactSection; 
             <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.8rem, 1.5vw, 0.88rem)", maxWidth: "340px", lineHeight: 1.7 }}>
               I&apos;m open to freelance projects, full-time roles, and collaborations. Reach out through any of the channels below.
             </p>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "100px", padding: "0.4rem 1rem", fontSize: "clamp(0.6rem, 1.1vw, 0.7rem)", color: "#86efac", marginTop: "2rem", fontFamily: 'var(--font-orbitron), sans-serif', letterSpacing: "0.06em" }}>
+
+            {/* Photo */}
+            {section.image && (
+              <div
+                ref={photoRef}
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "280px",
+                  aspectRatio: "3 / 4",
+                  borderRadius: "2px",
+                  overflow: "hidden",
+                  border: "1px solid var(--border)",
+                  marginTop: "1.5rem",
+                }}
+              >
+                <Image src={section.image} alt="Contact me" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 280px" />
+              </div>
+            )}
+
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "100px", padding: "0.4rem 1rem", fontSize: "clamp(0.6rem, 1.1vw, 0.7rem)", color: "#86efac", marginTop: section.image ? "1.5rem" : "2rem", fontFamily: 'var(--font-orbitron), sans-serif', letterSpacing: "0.06em" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e", display: "block", animation: "pulse 2s infinite" }} />
               AVAILABLE FOR NEW PROJECTS
             </div>

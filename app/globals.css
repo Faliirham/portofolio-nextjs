@@ -156,6 +156,11 @@ h1, h2, h3, h4, h5 {
   50% { opacity: 0.5; }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 @keyframes rpm-needle {
   0% { transform: rotate(-90deg); }
   100% { transform: rotate(90deg); }

@@ -1,5 +1,7 @@
 "use client";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
 import { MapPin, Coffee, Code2, Zap } from "lucide-react";
 import type { AboutSection } from "@/lib/types";
@@ -12,6 +14,24 @@ const traitIcons = [
 ];
 
 export default function About({ section }: { section: AboutSection }) {
+  const imageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !section.image || !imageRef.current) return;
+    import("@/lib/gsap").then(({ gsap }) => {
+      gsap.to(imageRef.current, {
+        y: -30,
+        ease: "none",
+        scrollTrigger: {
+          trigger: imageRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+  }, [section.image]);
+
   const traits = section.traits.map((t) => {
     const match = traitIcons.find((ti) => t.toLowerCase().includes(ti.key.toLowerCase()));
     return { icon: match?.icon || <Code2 size={13} />, text: t };
@@ -75,6 +95,30 @@ export default function About({ section }: { section: AboutSection }) {
           {/* Right — visual block */}
           <AnimatedSection delay={0.15}>
             <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+              {/* Image (if provided) */}
+              {section.image && (
+                <div
+                  ref={imageRef}
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: "4 / 3",
+                    borderRadius: "2px",
+                    overflow: "hidden",
+                    border: "1px solid var(--border)",
+                    marginBottom: "1px",
+                  }}
+                >
+                  <Image
+                    src={section.image}
+                    alt="About me"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+              )}
+
               {/* Quote card */}
               <div
                 className="racing-stripe"

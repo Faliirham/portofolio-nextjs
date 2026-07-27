@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProjects, getConfig } from "@/lib/content";
+import { STATUS_CONFIG } from "@/lib/types";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/ui/icons";
 import type { Metadata } from "next";
@@ -33,7 +34,30 @@ export default async function ProjectPage({ params }: Props) {
         </Link>
 
         <div style={{ marginBottom: "2.5rem" }}>
-          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", letterSpacing: "0.08em" }}>{project.year}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", letterSpacing: "0.08em" }}>{project.year}</span>
+            {(() => {
+              const sc = STATUS_CONFIG[project.status];
+              return (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    background: sc.bg,
+                    border: `1px solid ${sc.border}`,
+                    borderRadius: "2px",
+                    padding: "0.2rem 0.55rem",
+                  }}
+                >
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: sc.color, boxShadow: `0 0 6px ${sc.color}66` }} />
+                  <span style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.1em", color: sc.color }}>
+                    {sc.label}
+                  </span>
+                </span>
+              );
+            })()}
+          </div>
           <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.04em", marginTop: "0.25rem", marginBottom: "1rem" }}>
             {project.title}
           </h1>

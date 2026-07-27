@@ -1,17 +1,35 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
-import dynamic from "next/dynamic";
 import type { SkillsSection } from "@/lib/types";
 
-const SkillGraph = dynamic(() => import("@/components/three/SkillGraph"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ width: "100%", height: "clamp(200px, 40vw, 300px)", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-card)" }} />
-  ),
-});
-
 export default function Skills({ section }: { section: SkillsSection }) {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !gridRef.current) return;
+    import("@/lib/gsap").then(({ gsap }) => {
+      if (!gridRef.current) return;
+      const cards = gridRef.current.querySelectorAll("[data-skill-card]");
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+    });
+  }, []);
+
   return (
     <section
       id="skills"
@@ -40,13 +58,8 @@ export default function Skills({ section }: { section: SkillsSection }) {
           </p>
         </AnimatedSection>
 
-        {/* 3D Skill Graph */}
-        <AnimatedSection delay={0.1} className="mb-8 lg:mb-12">
-          <SkillGraph />
-        </AnimatedSection>
-
         {/* Skill tree layout */}
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative" }} ref={gridRef}>
           {/* Connecting line */}
           <div
             style={{
@@ -70,7 +83,7 @@ export default function Skills({ section }: { section: SkillsSection }) {
             className="lg:grid-cols-2"
           >
             {section.categories.map((group, i) => (
-              <AnimatedSection key={group.name} delay={i * 0.1}>
+              <div key={group.name} data-skill-card>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.2 }}
@@ -170,7 +183,7 @@ export default function Skills({ section }: { section: SkillsSection }) {
                     ))}
                   </div>
                 </motion.div>
-              </AnimatedSection>
+              </div>
             ))}
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
 import { Briefcase, Users, Flag } from "lucide-react";
 import type { ExperienceSection, ExperienceEntry } from "@/lib/types";
@@ -68,7 +69,6 @@ function TimelineCol({
       </div>
 
       <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: "0" }}>
-        {/* Track line */}
         <div
           style={{
             position: "absolute",
@@ -93,7 +93,6 @@ function TimelineCol({
               paddingBottom: i < items.length - 1 ? "clamp(1.5rem, 3vw, 2.25rem)" : "0",
             }}
           >
-            {/* Checkpoint dot */}
             <div style={{ paddingTop: "4px", flexShrink: 0 }}>
               <div
                 style={{
@@ -112,7 +111,6 @@ function TimelineCol({
               </div>
             </div>
 
-            {/* Content card */}
             <div
               className="racing-stripe"
               style={{
@@ -131,16 +129,23 @@ function TimelineCol({
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.25rem", marginBottom: "0.25rem" }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-orbitron), sans-serif',
-                    fontWeight: 700,
-                    fontSize: "clamp(0.72rem, 1.4vw, 0.82rem)",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  {item.title}
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  {item.image && (
+                    <div style={{ width: "24px", height: "24px", borderRadius: "4px", overflow: "hidden", flexShrink: 0, position: "relative", background: "var(--bg-secondary)" }}>
+                      <Image src={item.image} alt={item.org} fill style={{ objectFit: "contain" }} sizes="24px" />
+                    </div>
+                  )}
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-orbitron), sans-serif',
+                      fontWeight: 700,
+                      fontSize: "clamp(0.72rem, 1.4vw, 0.82rem)",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {item.title}
+                  </span>
+                </div>
                 <span style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "clamp(0.55rem, 1vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
                   {item.period}
                 </span>

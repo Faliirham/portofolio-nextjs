@@ -11,7 +11,7 @@ interface TrailDot {
 export default function CursorTrail() {
   const [dots, setDots] = useState<TrailDot[]>([]);
   const [isMobile, setIsMobile] = useState(true);
-  const idCounter = useRef(Date.now());
+  const idCounter = useRef(0);
   const lastPos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {

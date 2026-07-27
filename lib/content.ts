@@ -6,6 +6,7 @@ import type {
   AboutSection,
   SkillsSection,
   Project,
+  ProjectStatus,
   ExperienceSection,
   CertificationsSection,
   ContactSection,
@@ -47,6 +48,7 @@ export function getConfig(): Config {
     social: d.social as Config["social"],
     stats: d.stats as Config["stats"],
     bio: content,
+    avatar: resolveImage("config", d.avatar as string | undefined),
   };
 }
 
@@ -61,6 +63,7 @@ export function getAboutSection(): AboutSection {
     traits: d.traits as string[],
     skillMeters: d.skillMeters as AboutSection["skillMeters"],
     content,
+    image: resolveImage("about", d.image as string | undefined),
   };
 }
 
@@ -93,6 +96,7 @@ export function getProjects(): Project[] {
       position: d.position as number,
       year: d.year as string,
       featured: d.featured as boolean,
+      status: (d.status as ProjectStatus) || "finished",
       tech: d.tech as string[],
       github: d.github as string,
       live: d.live as string,
@@ -119,10 +123,14 @@ export function getProjectBySlug(slug: string): Project | null {
 export function getExperienceSection(): ExperienceSection {
   const { data } = readMdx("experience.mdx");
   const d = data as Record<string, unknown>;
+  const entries = d.entries as ExperienceSection["entries"];
   return {
     title: d.title as string,
     subtitle: d.subtitle as string,
-    entries: d.entries as ExperienceSection["entries"],
+    entries: entries.map((entry) => ({
+      ...entry,
+      image: resolveImage("experience", entry.image),
+    })),
   };
 }
 
@@ -151,6 +159,7 @@ export function getContactSection(): ContactSection {
     spotifyEmbed: d.spotifyEmbed as string,
     contactLinks: d.contactLinks as ContactSection["contactLinks"],
     content,
+    image: resolveImage("contact", d.image as string | undefined),
   };
 }
 
