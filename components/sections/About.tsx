@@ -1,50 +1,49 @@
 "use client";
 import { motion } from "framer-motion";
-import { personalInfo } from "@/lib/data";
 import { AnimatedSection, SectionLabel } from "@/components/ui";
 import { MapPin, Coffee, Code2, Zap } from "lucide-react";
+import type { AboutSection } from "@/lib/types";
 
-const traits = [
-  { icon: <Code2 size={14} />, text: "D-IV Informatics, Polinema" },
-  { icon: <Zap size={14} />, text: "Active in HMTI" },
-  { icon: <Coffee size={14} />, text: "Data & Intelligence driven" },
-  { icon: <MapPin size={14} />, text: "Based in Malang, ID" },
+const traitIcons = [
+  { icon: <Code2 size={13} />, key: "D-IV Informatics" },
+  { icon: <Zap size={13} />, key: "HMTI" },
+  { icon: <Coffee size={13} />, key: "Data-driven" },
+  { icon: <MapPin size={13} />, key: "Malang" },
 ];
 
-export default function About() {
+export default function About({ section }: { section: AboutSection }) {
+  const traits = section.traits.map((t) => {
+    const match = traitIcons.find((ti) => t.toLowerCase().includes(ti.key.toLowerCase()));
+    return { icon: match?.icon || <Code2 size={13} />, text: t };
+  });
+
   return (
-    <section id="about" style={{ padding: "7rem 0", borderTop: "1px solid var(--border)" }}>
+    <section id="about" className="section-py" style={{ borderTop: "1px solid var(--border)" }}>
       <div className="container-custom">
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "4rem",
-            alignItems: "start",
-          }}
+          style={{ display: "grid", gap: "clamp(2rem, 5vw, 4rem)", alignItems: "start" }}
           className="lg:grid-cols-[1fr_1fr]"
         >
           {/* Left */}
           <AnimatedSection>
-            <SectionLabel>About Me</SectionLabel>
+            <SectionLabel>{section.title}</SectionLabel>
             <h2
               style={{
-                fontSize: "clamp(2rem, 4vw, 3rem)",
+                fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
                 marginBottom: "1.5rem",
-                letterSpacing: "-0.03em",
+                letterSpacing: "0.03em",
+                textTransform: "uppercase",
               }}
             >
               Student who builds
               <br />
-              <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>
-                real things.
-              </span>
+              <span style={{ color: "var(--red)" }}>real things.</span>
             </h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: "1.5rem" }}>
-              {personalInfo.bio}
+            <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.85rem, 1.5vw, 0.92rem)", marginBottom: "1.5rem" }}>
+              {section.content.split("\n\n")[0] || section.content}
             </p>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>
-              <strong style={{ color: "var(--text-primary)" }}>What makes me different?</strong> I don't just write code; I build systems that solve real problems. My background in both full-stack development and machine learning allows me to design scalable architectures with intelligent capabilities, ensuring that the applications I create are both robust and smart.
+            <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.78rem, 1.3vw, 0.85rem)" }}>
+              <strong style={{ color: "var(--text-primary)" }}>What makes me different?</strong> {section.content.split("\n\n")[1] || ""}
             </p>
 
             {/* Traits */}
@@ -60,8 +59,10 @@ export default function About() {
                     border: "1px solid var(--border)",
                     borderRadius: "2px",
                     padding: "0.4rem 0.8rem",
-                    fontSize: "0.78rem",
+                    fontSize: "clamp(0.6rem, 1.2vw, 0.72rem)",
+                    fontFamily: 'var(--font-orbitron), sans-serif',
                     color: "var(--text-secondary)",
+                    letterSpacing: "0.03em",
                   }}
                 >
                   <span style={{ color: "var(--red-light)" }}>{t.icon}</span>
@@ -76,60 +77,77 @@ export default function About() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
               {/* Quote card */}
               <div
+                className="racing-stripe"
                 style={{
                   background: "var(--bg-card)",
                   border: "1px solid var(--border)",
-                  borderLeft: "3px solid var(--red)",
-                  padding: "1.75rem",
+                  padding: "clamp(1.2rem, 3vw, 1.75rem)",
                   borderRadius: "2px",
                 }}
               >
                 <p
                   style={{
-                    fontFamily: "'Syne', sans-serif",
-                    fontSize: "1.05rem",
-                    fontWeight: 500,
-                    lineHeight: 1.5,
+                    fontFamily: 'var(--font-orbitron), sans-serif',
+                    fontSize: "clamp(0.8rem, 1.5vw, 0.9rem)",
+                    fontWeight: 600,
+                    lineHeight: 1.6,
                     color: "var(--text-primary)",
                     marginBottom: "0.75rem",
+                    letterSpacing: "0.02em",
                   }}
                 >
-                  "First, solve the problem. Then, write the code."
+                  &quot;{section.quote}&quot;
                 </p>
-                <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>— John Johnson</p>
+                <p style={{ fontSize: "clamp(0.6rem, 1.2vw, 0.72rem)", color: "var(--text-muted)", fontFamily: 'var(--font-orbitron), sans-serif', letterSpacing: "0.08em" }}>
+                  {section.quoteAuthor}
+                </p>
               </div>
 
-              {/* Skills quick view */}
+              {/* Skills quick view — tachometer style */}
               <div
                 style={{
                   background: "var(--bg-card)",
                   border: "1px solid var(--border)",
-                  padding: "1.75rem",
+                  padding: "clamp(1.2rem, 3vw, 1.75rem)",
                   borderRadius: "2px",
                   marginTop: "1px",
                 }}
               >
-                <p style={{ fontSize: "0.72rem", color: "var(--red-light)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>
-                  Learning & exploring
+                <p
+                  style={{
+                    fontSize: "clamp(0.55rem, 1vw, 0.65rem)",
+                    color: "var(--yellow)",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    marginBottom: "1rem",
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-orbitron), sans-serif',
+                  }}
+                >
+                  SKILL METER
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  {[
-                    { label: "Full-stack development", pct: 90 },
-                    { label: "Machine Learning & AI", pct: 85 },
-                    { label: "Database Optimization", pct: 80 },
-                  ].map((item) => (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+                  {section.skillMeters.map((item) => (
                     <div key={item.label}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
-                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>{item.label}</span>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{item.pct}%</span>
+                        <span style={{ fontSize: "clamp(0.6rem, 1.2vw, 0.72rem)", fontFamily: 'var(--font-orbitron), sans-serif', color: "var(--text-secondary)", letterSpacing: "0.04em" }}>
+                          {item.label}
+                        </span>
+                        <span style={{ fontSize: "clamp(0.55rem, 1vw, 0.68rem)", fontFamily: 'var(--font-orbitron), sans-serif', color: "var(--yellow)", fontWeight: 700 }}>
+                          {item.value}%
+                        </span>
                       </div>
-                      <div style={{ height: "2px", background: "var(--border)", borderRadius: "1px", overflow: "hidden" }}>
+                      <div style={{ height: "4px", background: "rgba(255,255,255,0.04)", borderRadius: "2px", overflow: "hidden" }}>
                         <motion.div
                           initial={{ width: 0 }}
-                          whileInView={{ width: `${item.pct}%` }}
+                          whileInView={{ width: `${item.value}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                          style={{ height: "100%", background: "var(--red)", borderRadius: "1px" }}
+                          style={{
+                            height: "100%",
+                            background: `linear-gradient(90deg, var(--red), ${item.value > 85 ? "var(--yellow)" : "var(--red-light)"})`,
+                            borderRadius: "2px",
+                          }}
                         />
                       </div>
                     </div>

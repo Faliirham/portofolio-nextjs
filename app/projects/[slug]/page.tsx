@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { projects } from "@/lib/data";
+import { getProjects, getConfig } from "@/lib/content";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/ui/icons";
 import type { Metadata } from "next";
@@ -11,20 +11,18 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  const project = getProjects().find((p) => p.slug === slug);
   if (!project) return { title: "Not Found" };
-  return { title: `${project.title} — Rizky Pratama`, description: project.shortDesc };
+  return { title: `${project.title} — ${getConfig().name}`, description: project.shortDesc };
 }
 
 export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+  return getProjects().map((p) => ({ slug: p.slug }));
 }
-
-// Generate Static HTML
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  const project = getProjects().find((p) => p.slug === slug);
   if (!project) notFound();
 
   return (
@@ -35,18 +33,18 @@ export default async function ProjectPage({ params }: Props) {
         </Link>
 
         <div style={{ marginBottom: "2.5rem" }}>
-          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", letterSpacing: "0.08em" }}>{project!.year}</span>
+          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", letterSpacing: "0.08em" }}>{project.year}</span>
           <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.04em", marginTop: "0.25rem", marginBottom: "1rem" }}>
-            {project!.title}
+            {project.title}
           </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.6 }}>{project!.shortDesc}</p>
+          <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.6 }}>{project.shortDesc}</p>
         </div>
 
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "3rem" }}>
-          <a href={project!.github} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
+          <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
             <GithubIcon size={14} /> GitHub
           </a>
-          <a href={project!.live} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--red)", color: "#fff", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
+          <a href={project.live} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--red)", color: "#fff", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
             <ExternalLink size={14} /> Live Demo
           </a>
         </div>
@@ -57,18 +55,18 @@ export default async function ProjectPage({ params }: Props) {
           <h2 style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: "1rem" }}>
             Overview
           </h2>
-          <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: "0.95rem", marginBottom: "1.5rem" }}>{project!.description}</p>
+          <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: "0.95rem", marginBottom: "1.5rem" }}>{project.description}</p>
           
           <h2 style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: "1rem" }}>
             Role
           </h2>
-          <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: "0.95rem", marginBottom: "1.5rem", fontWeight: 500 }}>{project!.role}</p>
+          <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: "0.95rem", marginBottom: "1.5rem", fontWeight: 500 }}>{project.role}</p>
 
           <h2 style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: "1rem" }}>
             Key Contributions
           </h2>
           <ul style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: "0.95rem", marginBottom: "1.5rem", paddingLeft: "1.2rem", listStyleType: "disc" }}>
-            {project!.contributions?.map((c, i) => (
+            {project.contributions?.map((c, i) => (
               <li key={i} style={{ marginBottom: "0.5rem" }}>{c}</li>
             ))}
           </ul>
@@ -77,7 +75,7 @@ export default async function ProjectPage({ params }: Props) {
             Impact
           </h2>
           <div style={{ padding: "1rem", background: "var(--red-dim)", borderLeft: "3px solid var(--red)", color: "var(--text-primary)", fontSize: "0.95rem", lineHeight: 1.6, borderRadius: "0 4px 4px 0" }}>
-            {project!.impact}
+            {project.impact}
           </div>
         </div>
 
@@ -86,7 +84,7 @@ export default async function ProjectPage({ params }: Props) {
             Tech Stack
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-            {project!.tech.map((t) => (
+            {project.tech.map((t) => (
               <span key={t} style={{ background: "var(--red-dim)", border: "1px solid var(--border-red)", color: "#fca5a5", fontSize: "0.78rem", fontWeight: 500, padding: "0.35rem 0.75rem", borderRadius: "2px" }}>
                 {t}
               </span>

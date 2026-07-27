@@ -1,21 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
-
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #090909;
-  --bg-secondary: #0f0f0f;
-  --bg-card: #111111;
-  --bg-card-hover: #161616;
-  --red: #dc2626;
-  --red-light: #ef4444;
-  --red-dim: rgba(220, 38, 38, 0.12);
-  --red-glow: rgba(220, 38, 38, 0.25);
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #141414;
+  --bg-card-hover: #1a1a1a;
+  --red: #e11d48;
+  --red-light: #fb7185;
+  --red-dim: rgba(225, 29, 72, 0.1);
+  --red-glow: rgba(225, 29, 72, 0.3);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251, 191, 36, 0.12);
   --text-primary: #f5f5f5;
   --text-secondary: #a3a3a3;
   --text-muted: #525252;
-  --border: rgba(255,255,255,0.06);
-  --border-red: rgba(220,38,38,0.3);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-red: rgba(225, 29, 72, 0.3);
+  --carbon-1: #111111;
+  --carbon-2: #0d0d0d;
 }
 
 * {
@@ -32,17 +34,18 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 300;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5 {
-  font-family: 'Syne', sans-serif;
+  font-family: var(--font-orbitron), sans-serif;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
 }
 
 ::selection {
@@ -51,7 +54,7 @@ h1, h2, h3, h4, h5 {
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -60,21 +63,104 @@ h1, h2, h3, h4, h5 {
 
 ::-webkit-scrollbar-thumb {
   background: var(--red);
-  border-radius: 2px;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-light);
 }
 
 .container-custom {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
 }
 
-@media (min-width: 768px) {
-  .container-custom {
-    padding: 0 2.5rem;
+.section-py {
+  padding-top: clamp(3rem, 8vw, 7rem);
+  padding-bottom: clamp(3rem, 8vw, 7rem);
+}
+
+.racing-glow {
+  text-shadow: 0 0 30px rgba(225, 29, 72, 0.5), 0 0 60px rgba(225, 29, 72, 0.2);
+}
+
+.yellow-glow {
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.4), 0 0 60px rgba(251, 191, 36, 0.15);
+}
+
+.carbon-bg {
+  background-image:
+    linear-gradient(45deg, var(--carbon-1) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--carbon-1) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--carbon-1) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--carbon-1) 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+  background-color: var(--carbon-2);
+}
+
+.racing-stripe {
+  position: relative;
+}
+
+.racing-stripe::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--red), var(--yellow), var(--red));
+}
+
+.number-plate {
+  font-family: var(--font-orbitron), sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  border: 2px solid var(--border-red);
+  position: relative;
+}
+
+.number-plate::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+}
+
+.speed-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  opacity: 0.15;
+  animation: speed-line 3s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .speed-line {
+    opacity: 0.08;
   }
 }
 
-.red-glow {
-  text-shadow: 0 0 40px rgba(220, 38, 38, 0.4);
+@keyframes speed-line {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 0.15; }
+  100% { transform: translateX(200%); opacity: 0; }
+}
+
+@keyframes pulse-race {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes rpm-needle {
+  0% { transform: rotate(-90deg); }
+  100% { transform: rotate(90deg); }
+}
+
+.animate-pulse-race {
+  animation: pulse-race 2s ease-in-out infinite;
 }

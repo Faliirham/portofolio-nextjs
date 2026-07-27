@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import React from "react";
 
-// ── Button ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "outline" | "ghost";
   children: React.ReactNode;
@@ -10,15 +9,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ variant = "primary", children, href, className = "", ...props }: ButtonProps) {
-  const base =
-    "inline-flex items-center gap-2 font-medium text-sm tracking-wide transition-all duration-200 cursor-pointer";
+  const base = "inline-flex items-center gap-2 font-medium text-sm tracking-wide transition-all duration-200 cursor-pointer";
   const variants = {
-    primary:
-      "bg-red-600 text-white px-6 py-3 rounded-sm hover:bg-red-500 active:scale-95",
-    outline:
-      "border border-red-600/60 text-red-400 px-6 py-3 rounded-sm hover:bg-red-600/10 hover:border-red-500 active:scale-95",
-    ghost:
-      "text-neutral-400 px-4 py-2 hover:text-white active:scale-95",
+    primary: "bg-rose-600 text-white px-6 py-3 rounded-sm hover:bg-rose-500 active:scale-95",
+    outline: "border border-rose-600/60 text-rose-400 px-6 py-3 rounded-sm hover:bg-rose-600/10 hover:border-rose-500 active:scale-95",
+    ghost: "text-neutral-400 px-4 py-2 hover:text-white active:scale-95",
   };
 
   const cls = `${base} ${variants[variant]} ${className}`;
@@ -37,21 +32,24 @@ export function Button({ variant = "primary", children, href, className = "", ..
   );
 }
 
-// ── Badge ───────────────────────────────────────────────────────────────────
-export function Badge({ children }: { children: React.ReactNode }) {
+export function Badge({ children, color }: { children: React.ReactNode; color?: string }) {
+  const borderColor = color ? `${color}33` : "var(--border-red)";
+  const bgColor = color ? `${color}1a` : "var(--red-dim)";
+  const textColor = color ? `${color}cc` : "#fca5a5";
   return (
     <span
       style={{
-        background: "var(--red-dim)",
-        border: "1px solid var(--border-red)",
-        color: "#fca5a5",
-        fontSize: "0.72rem",
+        background: bgColor,
+        border: `1px solid ${borderColor}`,
+        color: textColor,
+        fontSize: "0.68rem",
         fontWeight: 500,
         letterSpacing: "0.04em",
-        padding: "0.25rem 0.6rem",
+        padding: "0.2rem 0.55rem",
         borderRadius: "2px",
         display: "inline-block",
         lineHeight: 1.4,
+        fontFamily: 'var(--font-orbitron), sans-serif',
       }}
     >
       {children}
@@ -59,33 +57,18 @@ export function Badge({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── SectionLabel ─────────────────────────────────────────────────────────────
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        marginBottom: "1rem",
-      }}
-    >
-      <span
-        style={{
-          width: "1.5rem",
-          height: "1px",
-          background: "var(--red)",
-          display: "block",
-        }}
-      />
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+      <span style={{ width: "1.5rem", height: "2px", background: "var(--red)", display: "block" }} />
       <span
         style={{
           color: "var(--red-light)",
-          fontSize: "0.72rem",
-          fontWeight: 600,
+          fontSize: "0.68rem",
+          fontWeight: 700,
           letterSpacing: "0.15em",
           textTransform: "uppercase",
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: 'var(--font-orbitron), sans-serif',
         }}
       >
         {children}
@@ -94,7 +77,6 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── AnimatedSection ─────────────────────────────────────────────────────────
 export function AnimatedSection({
   children,
   className = "",
@@ -117,14 +99,8 @@ export function AnimatedSection({
   );
 }
 
-// ── Divider ──────────────────────────────────────────────────────────────────
 export function Divider() {
   return (
-    <div
-      style={{
-        borderTop: "1px solid var(--border)",
-        margin: "0",
-      }}
-    />
+    <div style={{ borderTop: "1px solid var(--border)", margin: "0" }} />
   );
 }
