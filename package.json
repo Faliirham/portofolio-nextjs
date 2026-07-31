@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "preview": "next build && wrangler pages deploy out --project-name=faliirham",
-    "deploy": "next build && wrangler pages deploy out --project-name=faliirham",
+    "preview": "next build && wrangler pages deploy",
+    "deploy": "next build && wrangler pages deploy",
     "lint": "eslint"
   },
   "dependencies": {
