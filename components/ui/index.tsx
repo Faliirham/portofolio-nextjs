@@ -49,7 +49,7 @@ export function Badge({ children, color }: { children: React.ReactNode; color?: 
         borderRadius: "2px",
         display: "inline-block",
         lineHeight: 1.4,
-        fontFamily: 'var(--font-orbitron), sans-serif',
+        fontFamily: 'var(--font-ui)',
       }}
     >
       {children}
@@ -66,15 +66,15 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
           color: "var(--red-light)",
           fontSize: "0.68rem",
           fontWeight: 700,
-          letterSpacing: "0.15em",
-          textTransform: "uppercase",
-          fontFamily: 'var(--font-orbitron), sans-serif',
-        }}
-      >
-        {children}
-      </span>
-    </div>
-  );
+letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        fontFamily: 'var(--font-ui)',
+      }}
+    >
+      {children}
+    </span>
+  </div>
+);
 }
 
 export function AnimatedSection({
@@ -96,6 +96,49 @@ export function AnimatedSection({
     >
       {children}
     </motion.div>
+  );
+}
+
+export function SectionHeading({
+  num,
+  label,
+  title,
+}: {
+  num: string;
+  label: string;
+  title: React.ReactNode;
+}) {
+  return (
+    <div style={{ position: "relative", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}>
+      <span className="sec-num" aria-hidden="true">
+        {num}
+      </span>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div className="tape-line" style={{ width: "3rem", marginBottom: "1rem" }} />
+        <p
+          style={{
+            color: "var(--red-light)",
+            fontFamily: 'var(--font-ui)',
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            marginBottom: "0.6rem",
+          }}
+        >
+          {label}
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
+            letterSpacing: "0.01em",
+            textTransform: "uppercase",
+          }}
+        >
+          {title}
+        </h2>
+      </div>
+    </div>
   );
 }
 

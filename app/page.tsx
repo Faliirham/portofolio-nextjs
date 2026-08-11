@@ -7,7 +7,7 @@ import Experience from "@/components/sections/Experience";
 import Certifications from "@/components/sections/Certifications";
 import Contact from "@/components/sections/Contact";
 import CursorTrail from "@/components/ui/CursorTrail";
-import CheckeredTransition from "@/components/ui/CheckeredTransition";
+import Marquee from "@/components/ui/Marquee";
 import {
   getConfig,
   getAboutSection,
@@ -27,23 +27,31 @@ export default function Home() {
   const certifications = getCertificationsSection();
   const contact = getContactSection();
 
+  const skillTicker = skills.categories.flatMap((c) => c.items).slice(0, 12);
+  const zoneTicker = [
+    `Rider #${config.riderNumber.replace("#", "")}`,
+    config.role,
+    config.location,
+    config.email,
+  ];
+
   return (
     <>
       <CursorTrail />
-      <main>
+      <main id="main">
         <Navbar config={config} />
         <Hero config={config} />
-        <CheckeredTransition />
-        <About section={about} />
-        <CheckeredTransition />
+        <Marquee items={zoneTicker} variant="dark" />
+        <About section={about} config={config} />
+        <Marquee items={skillTicker} variant="red" />
         <Skills section={skills} />
-        <CheckeredTransition />
+        <Marquee items={zoneTicker} variant="dark" />
         <Projects projects={projects} />
-        <CheckeredTransition />
+        <Marquee items={skillTicker} variant="red" />
         <Experience section={experience} />
-        <CheckeredTransition />
+        <Marquee items={zoneTicker} variant="dark" />
         <Certifications section={certifications} />
-        <CheckeredTransition />
+        <Marquee items={skillTicker} variant="red" />
         <Contact section={contact} config={config} />
       </main>
     </>

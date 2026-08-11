@@ -2,17 +2,33 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { ArrowDown } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 import TiltCard from "@/components/ui/TiltCard";
+import Marquee from "@/components/ui/Marquee";
+import Lanyard from "@/components/ui/Lanyard";
 import type { Config } from "@/lib/types";
 
 const ParticleField = dynamic(() => import("@/components/three/ParticleField"), {
   ssr: false,
   loading: () => null,
 });
+
+const TICKER = [
+  "Full-Stack Developer",
+  "AI Engineer",
+  "Malang, Indonesia",
+  "Next.js",
+  "React",
+  "TypeScript",
+  "Laravel",
+  "Go",
+  "Supabase",
+  "Docker",
+  "AWS",
+  "Cloudflare",
+];
 
 export default function Hero({ config }: { config: Config }) {
   const nameRef = useRef<HTMLHeadingElement>(null);
@@ -22,9 +38,9 @@ export default function Hero({ config }: { config: Config }) {
     import("gsap").then(({ gsap }) => {
       if (nameRef.current) {
         gsap.from(nameRef.current, {
-          y: 40,
+          y: 60,
           opacity: 0,
-          duration: 0.8,
+          duration: 0.9,
           ease: "power3.out",
           delay: 0.4,
         });
@@ -32,45 +48,53 @@ export default function Hero({ config }: { config: Config }) {
     });
   }, []);
 
+  const [firstName, ...rest] = config.name.split(" ");
+  const lastName = rest.join(" ");
+
   return (
     <section
       id="hero"
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         alignItems: "center",
         position: "relative",
         overflow: "hidden",
         paddingTop: "80px",
+        paddingBottom: "clamp(4rem, 9vw, 7rem)",
       }}
     >
-      {/* 3D Particle field background */}
       <ParticleField />
 
-      {/* Speed lines background */}
-      {[...Array(5)].map((_, i) => (
-        <div
-          key={i}
-          className="speed-line"
-          style={{
-            top: `${15 + i * 18}%`,
-            left: 0,
-            right: 0,
-            animationDelay: `${i * 0.6}s`,
-          }}
-        />
-      ))}
-
-      {/* Carbon fiber subtle overlay */}
+      {/* Diagonal stripes — top right */}
       <div
+        aria-hidden="true"
         style={{
           position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-          maskImage: "radial-gradient(ellipse 80% 70% at 50% 0%, black 40%, transparent 100%)",
+          top: 0,
+          right: 0,
+          width: "clamp(240px, 38vw, 520px)",
+          height: "clamp(240px, 38vw, 520px)",
+          clipPath: "polygon(0 0, 100% 0, 100% 100%)",
+          opacity: 0.32,
+          pointerEvents: "none",
         }}
+        className="stripes-diag"
+      />
+
+      {/* Checker — bottom left corner */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: "-64px",
+          left: "-64px",
+          width: "clamp(140px, 20vw, 260px)",
+          height: "clamp(140px, 20vw, 260px)",
+          opacity: 0.16,
+          pointerEvents: "none",
+        }}
+        className="checker-big"
       />
 
       {/* Red glow blob */}
@@ -78,14 +102,53 @@ export default function Hero({ config }: { config: Config }) {
         style={{
           position: "absolute",
           top: "5%",
-          right: "-10%",
-          width: "50vw",
-          height: "50vw",
-          background: "radial-gradient(circle, rgba(225,29,72,0.08) 0%, transparent 70%)",
+          right: "-12%",
+          width: "55vw",
+          height: "55vw",
+          background: "radial-gradient(circle, rgba(225,29,72,0.12) 0%, transparent 70%)",
           borderRadius: "50%",
           pointerEvents: "none",
         }}
       />
+
+      {/* Rider number watermark */}
+      <span
+        aria-hidden="true"
+        className="text-outline-faint"
+        style={{
+          position: "absolute",
+          top: "3%",
+          right: "1vw",
+          fontFamily: 'var(--font-orbitron), sans-serif',
+          fontWeight: 900,
+          fontSize: "clamp(7rem, 26vw, 19rem)",
+          lineHeight: 1,
+          letterSpacing: "0.02em",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        {config.riderNumber.replace("#", "")}
+      </span>
+
+      {/* Hanging lanyard — pull it with the cursor */}
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0, y: -40, rotate: -6 }}
+        animate={{ opacity: 1, y: 0, rotate: 0 }}
+        transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          position: "absolute",
+          top: "82px",
+          right: "clamp(0.5rem, 3vw, 3.5rem)",
+          width: 300,
+          height: 280,
+          zIndex: 3,
+          pointerEvents: "auto",
+        }}
+      >
+        <Lanyard config={config} />
+      </motion.div>
 
       <div className="container-custom" style={{ position: "relative", zIndex: 1, width: "100%" }}>
         <div
@@ -104,7 +167,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* Status badge */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ marginBottom: "1.5rem" }}
+              style={{ marginBottom: "1.75rem" }}
             >
               <span
                 style={{
@@ -113,18 +176,17 @@ export default function Hero({ config }: { config: Config }) {
                   gap: "0.5rem",
                   background: "var(--red-dim)",
                   border: "1px solid var(--border-red)",
-                  borderRadius: "100px",
                   padding: "0.3rem 0.9rem",
                   fontSize: "0.72rem",
-                  fontFamily: 'var(--font-orbitron), sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   color: "#fca5a5",
-                  fontWeight: 500,
-                  letterSpacing: "0.08em",
+                  fontWeight: 600,
+                  letterSpacing: "0.12em",
                 }}
               >
                 <span
                   style={{
-                    width: "6px", height: "6px", borderRadius: "50%",
+                    width: "6px", height: "6px",
                     background: "#22c55e", display: "block",
                     boxShadow: "0 0 8px #22c55e", animation: "pulse 2s infinite",
                   }}
@@ -133,65 +195,46 @@ export default function Hero({ config }: { config: Config }) {
               </span>
             </motion.div>
 
-            {/* Name — Rider plate style */}
+            {/* Name — giant brutal stack */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
               style={{ marginBottom: "1.5rem" }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                <h1
-                  ref={nameRef}
-                  style={{
-                    fontFamily: 'var(--font-orbitron), sans-serif',
-                    fontSize: "clamp(2.2rem, 7vw, 5rem)",
-                    fontWeight: 900,
-                    lineHeight: 1.0,
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {config.name.split(" ")[0]}
-                </h1>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-orbitron), sans-serif',
-                    fontWeight: 900,
-                    fontSize: "clamp(1.2rem, 4vw, 3rem)",
-                    color: "var(--yellow)",
-                    opacity: 0.3,
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {config.riderNumber}
-                </span>
-              </div>
-              <p
+              <h1
+                ref={nameRef}
                 style={{
                   fontFamily: 'var(--font-orbitron), sans-serif',
-                  fontSize: "clamp(0.75rem, 2vw, 1.3rem)",
-                  fontWeight: 400,
-                  color: "var(--text-secondary)",
-                  letterSpacing: "0.08em",
+                  fontWeight: 900,
+                  lineHeight: 0.82,
+                  letterSpacing: "0.005em",
                   textTransform: "uppercase",
                 }}
               >
-                {config.name.split(" ").slice(1).join(" ")}
-              </p>
+                <span style={{ display: "block", fontSize: "clamp(3rem, 13vw, 9.5rem)" }}>
+                  {firstName}
+                </span>
+                <span
+                  className="text-outline"
+                  style={{ display: "block", fontSize: "clamp(1.7rem, 7vw, 4.5rem)", marginTop: "0.12em" }}
+                >
+                  {lastName}
+                </span>
+              </h1>
             </motion.div>
 
-            {/* Role line */}
+            {/* Role — red tape + label */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" }}
+              style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.75rem", flexWrap: "wrap" }}
             >
-              <span style={{ width: "2rem", height: "2px", background: "var(--red)", display: "block", flexShrink: 0 }} />
+              <div className="tape-line" style={{ width: "3.5rem", flexShrink: 0 }} />
               <span
                 style={{
-                  fontSize: "clamp(0.65rem, 1.5vw, 0.78rem)",
-                  fontFamily: 'var(--font-orbitron), sans-serif',
+                  fontSize: "clamp(0.68rem, 1.6vw, 0.82rem)",
+                  fontFamily: 'var(--font-ui)',
                   color: "var(--text-secondary)",
-                  fontWeight: 500,
-                  letterSpacing: "0.1em",
+                  fontWeight: 600,
+                  letterSpacing: "0.14em",
                   textTransform: "uppercase",
                 }}
               >
@@ -202,61 +245,72 @@ export default function Hero({ config }: { config: Config }) {
             {/* Tagline */}
             <motion.p
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.25rem)", color: "var(--text-secondary)", fontWeight: 300, maxWidth: "480px", marginBottom: "2.5rem", lineHeight: 1.6 }}
+              style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.15rem)", color: "var(--text-secondary)", fontWeight: 400, maxWidth: "480px", marginBottom: "2rem", lineHeight: 1.6 }}
             >
               {config.tagline}
-              <br />
-              <span style={{ color: "var(--text-muted)", fontSize: "clamp(0.75rem, 1.5vw, 0.85rem)" }}>Clean code. Thoughtful UX. Real impact.</span>
             </motion.p>
 
             {/* CTAs */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "clamp(2rem, 5vw, 3rem)" }}
+              style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "clamp(1.75rem, 4vw, 2.5rem)" }}
             >
-              <a
-                href="#projects"
-                style={{
-                  fontFamily: 'var(--font-orbitron), sans-serif',
-                  background: "var(--red)",
-                  color: "#fff",
-                  padding: "clamp(0.6rem, 2vw, 0.75rem) clamp(1.2rem, 3vw, 1.75rem)",
-                  fontSize: "clamp(0.65rem, 1.5vw, 0.78rem)",
-                  fontWeight: 700,
-                  borderRadius: "2px",
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  transition: "background 0.2s",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--red-light)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--red)"; }}
-              >
+              <a href="#projects" className="btn btn-primary">
                 VIEW PROJECTS
               </a>
-              <a
-                href="#contact"
-                style={{
-                  fontFamily: 'var(--font-orbitron), sans-serif',
-                  border: "1px solid var(--border-red)",
-                  color: "#fca5a5",
-                  padding: "clamp(0.6rem, 2vw, 0.75rem) clamp(1.2rem, 3vw, 1.75rem)",
-                  fontSize: "clamp(0.65rem, 1.5vw, 0.78rem)",
-                  fontWeight: 500,
-                  borderRadius: "2px",
-                  textDecoration: "none",
-                  transition: "all 0.2s",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--red-dim)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-              >
+              <a href="#contact" className="btn btn-outline">
                 GET IN TOUCH
               </a>
+            </motion.div>
+
+            {/* Stats — decal tiles */}
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+              style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginBottom: "1.75rem" }}
+            >
+              {config.stats.map((s, i) => (
+                <div
+                  key={s.label}
+                  className="sticker"
+                  style={{
+                    background: i === 1 ? "var(--yellow)" : "var(--bg-card)",
+                    border: i === 1 ? "2px solid var(--yellow)" : "1px solid var(--border)",
+                    color: i === 1 ? "#0a0a0a" : "var(--text-primary)",
+                    padding: "0.7rem 1.1rem",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: "0.15rem",
+                    transform: i % 2 === 0 ? "rotate(-1.5deg)" : "rotate(1.2deg)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-ui)',
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      opacity: i === 1 ? 0.75 : 0.6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                    }}
+                  >
+                    {s.icon} {s.label}
+                  </span>
+                  <span
+                    className="tabular-nums"
+                    style={{
+                      fontFamily: 'var(--font-orbitron), sans-serif',
+                      fontWeight: 800,
+                      fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+                      letterSpacing: "0.03em",
+                      color: i === 1 ? "#0a0a0a" : "var(--red-light)",
+                    }}
+                  >
+                    {s.value}
+                  </span>
+                </div>
+              ))}
             </motion.div>
 
             {/* Social icons */}
@@ -265,10 +319,10 @@ export default function Hero({ config }: { config: Config }) {
               style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}
             >
               {[
-                { href: config.social.github, icon: <GithubIcon size={15} />, label: "GitHub" },
-                { href: config.social.linkedin, icon: <LinkedinIcon size={15} />, label: "LinkedIn" },
-                { href: config.social.instagram, icon: <InstagramIcon size={15} />, label: "Instagram" },
-                { href: `mailto:${config.email}`, icon: <Mail size={15} />, label: "Email" },
+                { href: config.social.github, icon: <GithubIcon size={17} />, label: "GitHub" },
+                { href: config.social.linkedin, icon: <LinkedinIcon size={17} />, label: "LinkedIn" },
+                { href: config.social.instagram, icon: <InstagramIcon size={17} />, label: "Instagram" },
+                { href: `mailto:${config.email}`, icon: <Mail size={17} />, label: "Email" },
               ].map((s, i) => (
                 <a
                   key={i}
@@ -276,48 +330,32 @@ export default function Hero({ config }: { config: Config }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={s.label}
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "1px solid var(--border)",
-                    borderRadius: "2px",
-                    color: "var(--text-muted)",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--red-light)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--border-red)";
-                    (e.currentTarget as HTMLElement).style.background = "var(--red-dim)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }}
+                  className="icon-btn"
+                  style={{ padding: i < 3 ? "0 1.05rem" : "0 1.25rem" }}
                 >
                   {s.icon}
+                  <span>{s.label}</span>
                 </a>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* Right — Rider profile card with 3D tilt */}
+          {/* Right — rider profile card with 3D tilt */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.5 }}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}
           >
+            {/* Checker strip above card */}
+            <div className="checker-big" style={{ width: "min(340px, 100%)", height: "14px", opacity: 0.9 }} />
+
             <TiltCard
               style={{
                 width: "100%",
                 maxWidth: "340px",
               }}
             >
-              {/* Main card */}
               <div
                 className="number-plate"
                 style={{
@@ -338,7 +376,6 @@ export default function Hero({ config }: { config: Config }) {
                     background: "linear-gradient(135deg, rgba(225,29,72,0.08) 0%, transparent 60%)",
                   }}
                 />
-                {/* Rider number big */}
                 <div
                   style={{
                     position: "absolute",
@@ -353,7 +390,6 @@ export default function Hero({ config }: { config: Config }) {
                 >
                   {config.riderNumber}
                 </div>
-                {/* Avatar */}
                 <div
                   style={{
                     width: "clamp(100px, 25vw, 220px)",
@@ -388,76 +424,41 @@ export default function Hero({ config }: { config: Config }) {
                 </div>
                 <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
                   <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.75rem, 2vw, 0.9rem)", letterSpacing: "0.05em" }}>
-                    {config.name.split(" ")[0].toUpperCase()}
+                    {firstName.toUpperCase()}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "clamp(0.55rem, 1.2vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.1em", marginTop: "0.25rem" }}>
+                  <p style={{ fontFamily: 'var(--font-ui)', fontSize: "clamp(0.55rem, 1.2vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.12em", marginTop: "0.25rem" }}>
                     {config.role.toUpperCase()}
                   </p>
                 </div>
-                {/* Bottom stripe */}
                 <div
                   style={{
                     position: "absolute",
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    height: "3px",
+                    height: "4px",
                     background: "linear-gradient(90deg, var(--red), var(--yellow), var(--red))",
                   }}
                 />
               </div>
             </TiltCard>
 
-            {/* Race stats grid */}
-            <div
-              className="stats-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "1px",
-                width: "100%",
-                maxWidth: "340px",
-                marginTop: "1px",
-                border: "1px solid var(--border)",
-                borderRadius: "2px",
-                overflow: "hidden",
-              }}
+            {/* Yellow tape under card */}
+            <div className="stripes-gold" style={{ width: "min(340px, 100%)", height: "6px", marginTop: "2px", opacity: 0.9 }} />
+
+            <p
+              className="stamp"
+              style={{ color: "var(--red-light)", borderColor: "var(--border-red)", marginTop: "1.25rem", fontSize: "0.62rem" }}
             >
-              {config.stats.map((s) => (
-                <div key={s.label} style={{ background: "var(--bg-card)", padding: "clamp(0.5rem, 2vw, 0.8rem)", textAlign: "center" }}>
-                  <p style={{ fontSize: "clamp(0.8rem, 2vw, 0.9rem)", marginBottom: "0.15rem" }}>{s.icon}</p>
-                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.8rem, 2vw, 1rem)", color: "var(--red-light)" }}>
-                    {s.value}
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "clamp(0.55rem, 1.2vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    {s.label}
-                  </p>
-                </div>
-              ))}
-            </div>
+              RIDER #{config.riderNumber.replace("#", "")}
+            </p>
           </motion.div>
         </div>
+      </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          style={{
-            position: "absolute",
-            bottom: "clamp(-1rem, -3vw, -3rem)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            color: "var(--text-muted)",
-          }}
-        >
-          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
-            <ArrowDown size={14} />
-          </motion.div>
-        </motion.div>
+      {/* Bottom red marquee band */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
+        <Marquee items={[...TICKER, config.riderNumber]} variant="red" />
       </div>
 
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>

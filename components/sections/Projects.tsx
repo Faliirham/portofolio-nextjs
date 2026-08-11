@@ -3,37 +3,36 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, ArrowRight, Trophy, Medal, ChevronDown } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronDown } from "lucide-react";
 import { GithubIcon } from "@/components/ui/icons";
-import { AnimatedSection, SectionLabel } from "@/components/ui";
+import { AnimatedSection, SectionHeading } from "@/components/ui";
+import CircuitMap from "@/components/ui/CircuitMap";
 import type { Project } from "@/lib/types";
 import { STATUS_CONFIG } from "@/lib/types";
 
 const LOAD_MORE_COUNT = 4;
-const TOP_POSITION = 5;
 
 export default function Projects({ projects }: { projects: Project[] }) {
   const sorted = [...projects].sort((a, b) => a.position - b.position);
-  const topProjects = sorted.filter((p) => p.position <= TOP_POSITION);
-  const restProjects = sorted.filter((p) => p.position > TOP_POSITION);
-  const [showCount, setShowCount] = useState(0);
-  const visibleRest = restProjects.slice(0, showCount);
-  const hasMore = showCount < restProjects.length;
+  const [showCount, setShowCount] = useState(3);
+  const initial = sorted.slice(0, 3);
+  const appended = sorted.slice(3, showCount);
+  const hasMore = showCount < sorted.length;
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !gridRef.current) return;
     import("@/lib/gsap").then(({ gsap }) => {
       if (!gridRef.current) return;
-      const cards = gridRef.current.querySelectorAll("[data-project-card]");
+      const rows = gridRef.current.querySelectorAll("[data-circuit-row]");
       gsap.fromTo(
-        cards,
-        { opacity: 0, y: 30 },
+        rows,
+        { opacity: 0, x: 24 },
         {
           opacity: 1,
-          y: 0,
-          duration: 0.55,
-          stagger: 0.1,
+          x: 0,
+          duration: 0.6,
+          stagger: 0.12,
           ease: "power3.out",
           scrollTrigger: {
             trigger: gridRef.current,
@@ -48,89 +47,329 @@ export default function Projects({ projects }: { projects: Project[] }) {
     <section id="projects" className="section-py" style={{ borderTop: "1px solid var(--border)" }}>
       <div className="container-custom">
         <AnimatedSection>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "clamp(2rem, 5vw, 3rem)", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
-              <SectionLabel>Race Results</SectionLabel>
-              <h2 style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)", letterSpacing: "0.03em", textTransform: "uppercase" }}>
-                Selected work
-              </h2>
+          <SectionHeading num="03" label="Race Results" title="The circuit so far" />
+        </AnimatedSection>
+
+        {/* 3D circuit map — one full lap */}
+        <div style={{ marginBottom: "clamp(2.5rem, 6vw, 4rem)" }}>
+          <CircuitMap projects={sorted} />
+        </div>
+
+        {/* Start grid */}
+        <AnimatedSection>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "clamp(2rem, 5vw, 3rem)" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                border: "1px solid var(--border-red)",
+                background: "var(--red-dim)",
+                padding: "0.45rem 1.1rem",
+                fontFamily: 'var(--font-ui)',
+                fontSize: "0.68rem",
+                fontWeight: 800,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "#fca5a5",
+              }}
+            >
+              <span style={{ width: "8px", height: "8px", background: "#22c55e", display: "block" }} />
+              Start — grid position
             </div>
           </div>
         </AnimatedSection>
 
-        {/* Top podium — always visible */}
-        <div
-          ref={gridRef}
-          style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1px", marginBottom: restProjects.length > 0 ? "1px" : "0" }}
-          className="md:grid-cols-2"
-        >
-          {topProjects.map((project, i) => (
-            <div key={project.slug} data-project-card>
-              <ProjectCard project={project} index={i} />
-            </div>
-          ))}
+        {/* Circuit: vertical racing line + corner nodes */}
+        <div ref={gridRef} style={{ position: "relative" }}>
+          {/* Racing line spine */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "28px",
+              top: "-8px",
+              bottom: "-8px",
+              width: "3px",
+              background: "repeating-linear-gradient(180deg, var(--red) 0 10px, transparent 10px 18px)",
+              opacity: 0.55,
+            }}
+            className="md:left-1/2 md:-translate-x-1/2"
+          />
+
+          {initial.map((project, i) => {
+            const even = i % 2 === 0;
+            const statusCfg = STATUS_CONFIG[project.status];
+            return (
+              <div key={project.slug} data-circuit-row id={`row-${project.slug}`} style={{ scrollMarginTop: "90px" }}>
+                {/* Sector label (between corners) */}
+                {i > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      margin: "0.25rem 0 2rem",
+                      paddingLeft: "4rem",
+                    }}
+                    className="md:px-0"
+                  >
+                    <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-orbitron), sans-serif',
+                        fontSize: "0.58rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.18em",
+                        color: "var(--yellow)",
+                        textTransform: "uppercase",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Sector {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
+                  </div>
+                )}
+
+                {/* Corner row */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "56px 1fr",
+                    gap: "0.9rem",
+                    alignItems: "center",
+                    marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
+                  }}
+                  className="md:grid-cols-[1fr_72px_1fr] md:gap-10"
+                >
+                  {/* Corner node */}
+                  <div
+                    style={{ gridColumn: "1", gridRow: "1", justifySelf: "center", position: "relative", zIndex: 1 }}
+                    className="md:col-start-2"
+                  >
+                    <div style={{ position: "relative", width: "52px", height: "52px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          transform: "rotate(45deg)",
+                          background: "var(--bg-card)",
+                          border: `2px solid ${project.status === "finished" ? "var(--yellow)" : statusCfg.color}`,
+                          boxShadow: project.status === "ongoing" ? "0 0 18px var(--red-glow)" : "none",
+                          transition: "transform 0.3s ease",
+                        }}
+                      />
+                      <span
+                        style={{
+                          position: "relative",
+                          fontFamily: 'var(--font-orbitron), sans-serif',
+                          fontWeight: 900,
+                          fontSize: "0.8rem",
+                          color: statusCfg.color,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        T{i + 1}
+                      </span>
+                    </div>
+                    <p
+                      className="tabular-nums"
+                      style={{
+                        textAlign: "center",
+                        marginTop: "0.4rem",
+                        fontFamily: 'var(--font-ui)',
+                        fontSize: "0.58rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      {project.year}
+                    </p>
+                  </div>
+
+                  {/* Corner card */}
+                  <div
+                    style={{ gridColumn: "2", gridRow: "1" }}
+                    className={even ? "md:col-start-1" : "md:col-start-3"}
+                  >
+                    <div
+                      className="card-brutal"
+                      style={{ padding: "clamp(1.1rem, 2.5vw, 1.5rem)", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", overflow: "hidden" }}
+                    >
+                      <div className="tape-line" style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: statusCfg.color }} />
+
+                      {/* Corner sticker on image */}
+                      {project.image && (
+                        <div className="img-zoom" style={{ position: "relative", width: "100%", height: "clamp(140px, 26vw, 200px)", background: "var(--bg-secondary)", marginBottom: "0.25rem" }}>
+                          <Image
+                            src={project.image}
+                            alt={project.title}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <span
+                            className="sticker"
+                            style={{
+                              position: "absolute",
+                              bottom: "0.5rem",
+                              left: "0.5rem",
+                              background: "var(--yellow)",
+                              color: "#0a0a0a",
+                              fontSize: "0.56rem",
+                              padding: "0.25rem 0.55rem",
+                              fontWeight: 800,
+                              fontFamily: 'var(--font-ui)',
+                              letterSpacing: "0.14em",
+                              transform: "rotate(0deg)",
+                            }}
+                          >
+                            T{i + 1} · {project.year}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Header */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
+                        <h3
+                          style={{
+                            fontFamily: 'var(--font-orbitron), sans-serif',
+                            fontWeight: 800,
+                            fontSize: "clamp(0.9rem, 2vw, 1.15rem)",
+                            letterSpacing: "0.02em",
+                          }}
+                        >
+                          {project.title}
+                        </h3>
+                        <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
+                          >
+                            <GithubIcon size={14} />
+                          </a>
+                          <a
+                            href={project.live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--red-light)")}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Status badge — hard square */}
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          background: statusCfg.bg,
+                          border: `1px solid ${statusCfg.border}`,
+                          padding: "0.25rem 0.6rem",
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: "7px",
+                            height: "7px",
+                            background: statusCfg.color,
+                            boxShadow: `0 0 6px ${statusCfg.color}66`,
+                            animation: project.status === "ongoing" ? "pulse 2s infinite" : undefined,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-ui)',
+                            fontSize: "clamp(0.44rem, 0.8vw, 0.54rem)",
+                            fontWeight: 800,
+                            letterSpacing: "0.12em",
+                            color: statusCfg.color,
+                          }}
+                        >
+                          {statusCfg.label}
+                        </span>
+                      </div>
+
+                      <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.75rem, 1.3vw, 0.84rem)", lineHeight: 1.6, flex: 1 }}>
+                        {project.shortDesc}
+                      </p>
+
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                        {project.tech.map((t) => (
+                          <span
+                            key={t}
+                            className="chip-square"
+                            style={{
+                              background: "var(--red-dim)",
+                              border: "1px solid var(--border-red)",
+                              color: "var(--red-light)",
+                              fontSize: "clamp(0.5rem, 1vw, 0.6rem)",
+                              fontFamily: 'var(--font-ui)',
+                              fontWeight: 500,
+                              letterSpacing: "0.04em",
+                              padding: "0.2rem 0.5rem",
+                            }}
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          color: "var(--red-light)",
+                          fontSize: "clamp(0.58rem, 1.1vw, 0.68rem)",
+                          fontFamily: 'var(--font-ui)',
+                          fontWeight: 700,
+                          textDecoration: "none",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Read more <ArrowRight size={12} />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Load More — rest projects */}
+        {/* Loaded rows (appended via Continue the lap) */}
         <AnimatePresence>
-          {visibleRest.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1px", marginTop: "1px" }}
-              className="md:grid-cols-2"
-            >
-              {visibleRest.map((project, i) => (
-                <motion.div
-                  key={project.slug}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <ProjectCard project={project} index={i + topProjects.length} />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+          {appended.map((project, offset) => (
+            <CircuitRow key={project.slug} project={project} corner={4 + offset} delay={offset * 0.08} />
+          ))}
         </AnimatePresence>
 
         {/* Load More button */}
         {hasMore && (
           <AnimatedSection>
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(1.5rem, 3vw, 2.5rem)" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(1rem, 3vw, 2rem)" }}>
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowCount((prev) => prev + LOAD_MORE_COUNT)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text-primary)",
-                  padding: "0.7rem 1.5rem",
-                  borderRadius: "2px",
-                  cursor: "pointer",
-                  fontFamily: 'var(--font-orbitron), sans-serif',
-                  fontSize: "clamp(0.6rem, 1.1vw, 0.7rem)",
-                  fontWeight: 600,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  transition: "border-color 0.2s, box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.borderColor = "var(--border-red)";
-                  el.style.boxShadow = "0 0 20px rgba(225,29,72,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.borderColor = "var(--border)";
-                  el.style.boxShadow = "none";
-                }}
+                className="load-more"
               >
-                {/* Checkered icon */}
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <rect x="0" y="0" width="3.5" height="3.5" fill="var(--red)" />
                   <rect x="3.5" y="3.5" width="3.5" height="3.5" fill="var(--red)" />
@@ -141,9 +380,42 @@ export default function Projects({ projects }: { projects: Project[] }) {
                   <rect x="7" y="7" width="3.5" height="3.5" fill="var(--red)" />
                   <rect x="10.5" y="10.5" width="3.5" height="3.5" fill="var(--red)" />
                 </svg>
-                Show More
+                Continue the lap
                 <ChevronDown size={14} />
               </motion.button>
+            </div>
+          </AnimatedSection>
+        )}
+
+        {/* Finish line */}
+        {!hasMore && (
+          <AnimatedSection>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1rem",
+                marginTop: "clamp(2.5rem, 6vw, 4rem)",
+                padding: "clamp(1.5rem, 4vw, 2.5rem)",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                textAlign: "center",
+              }}
+            >
+              <div className="checker-big" style={{ width: "clamp(120px, 20vw, 180px)", height: "22px" }} />
+              <p
+                className="stamp"
+                style={{ color: "var(--yellow)", borderColor: "rgba(251, 191, 36, 0.5)", fontSize: "0.7rem", transform: "rotate(-1.5deg)" }}
+              >
+                Finish line
+              </p>
+              <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.8rem, 1.5vw, 0.9rem)", maxWidth: "440px", margin: "0 auto", lineHeight: 1.7 }}>
+                Every corner counts. The next lap starts when you&apos;re ready to build together.
+              </p>
+              <Link href="/#contact" className="btn btn-primary">
+                Start the next lap
+              </Link>
             </div>
           </AnimatedSection>
         )}
@@ -152,246 +424,211 @@ export default function Projects({ projects }: { projects: Project[] }) {
   );
 }
 
-function ProjectCard({
+function CircuitRow({
   project,
-  index,
+  corner,
+  delay,
 }: {
   project: Project;
-  index: number;
+  corner: number;
+  delay: number;
 }) {
-  const podiumColors: Record<number, string> = { 1: "#fbbf24", 2: "#c0c0c0", 3: "#cd7f32" };
-  const podiumColor = podiumColors[project.position] || "var(--text-muted)";
+  const even = (corner - 1) % 2 === 0;
   const statusCfg = STATUS_CONFIG[project.status];
-  const isTop3 = project.position <= 3;
-
   return (
     <motion.div
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.2 }}
-      style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border)",
-        padding: "clamp(1.2rem, 3vw, 2rem)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.85rem",
-        height: "100%",
-        cursor: "pointer",
-        position: "relative",
-        overflow: "hidden",
-        transition: "border-color 0.25s, box-shadow 0.25s",
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "rgba(225,29,72,0.35)";
-        el.style.boxShadow = "0 0 40px rgba(225,29,72,0.06)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "var(--border)";
-        el.style.boxShadow = "none";
-      }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
+      data-circuit-row
+      id={`row-${project.slug}`}
+      style={{ scrollMarginTop: "90px" }}
     >
-      {/* Top stripe — podium color for top 3 */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "2px",
-          background: isTop3 ? `linear-gradient(90deg, ${podiumColor}, transparent)` : "linear-gradient(90deg, var(--red), transparent)",
-        }}
-      />
-
-      {/* Status badge */}
-      <div
-        style={{
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
-          gap: "0.35rem",
-          background: statusCfg.bg,
-          border: `1px solid ${statusCfg.border}`,
-          borderRadius: "2px",
-          padding: "0.2rem 0.55rem",
-          alignSelf: "flex-start",
-          marginBottom: "0.15rem",
+          gap: "0.75rem",
+          margin: "0.25rem 0 2rem",
+          paddingLeft: "4rem",
         }}
+        className="md:px-0"
       >
-        <span
-          style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: statusCfg.color,
-            boxShadow: `0 0 6px ${statusCfg.color}66`,
-            animation: project.status === "ongoing" ? "pulse 2s infinite" : undefined,
-          }}
-        />
+        <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
         <span
           style={{
             fontFamily: 'var(--font-orbitron), sans-serif',
-            fontSize: "clamp(0.4rem, 0.8vw, 0.5rem)",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            color: statusCfg.color,
+            fontSize: "0.58rem",
+            fontWeight: 800,
+            letterSpacing: "0.18em",
+            color: "var(--yellow)",
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
           }}
         >
-          {statusCfg.label}
+          Sector {String(corner).padStart(2, "0")}
         </span>
+        <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
       </div>
 
-      {/* Project image */}
-      {project.image && (
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: isTop3 ? "clamp(120px, 25vw, 180px)" : "clamp(80px, 18vw, 120px)",
-            borderRadius: "2px",
-            overflow: "hidden",
-            background: "var(--bg-secondary)",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            style={{ objectFit: "cover" }}
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-          {isTop3 && (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "56px 1fr",
+          gap: "0.9rem",
+          alignItems: "center",
+          marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
+        }}
+        className="md:grid-cols-[1fr_72px_1fr] md:gap-10"
+      >
+        <div style={{ gridColumn: "1", gridRow: "1", justifySelf: "center", position: "relative", zIndex: 1 }} className="md:col-start-2">
+          <div style={{ position: "relative", width: "52px", height: "52px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div
               style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "2px",
-                background: `${podiumColor}15`,
-                border: `1px solid ${podiumColor}33`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: podiumColor,
-                flexShrink: 0,
+                position: "absolute",
+                inset: 0,
+                transform: "rotate(45deg)",
+                background: "var(--bg-card)",
+                border: `2px solid ${project.status === "finished" ? "var(--yellow)" : statusCfg.color}`,
+                boxShadow: project.status === "ongoing" ? "0 0 18px var(--red-glow)" : "none",
               }}
-            >
-              {project.position === 1 ? <Trophy size={14} /> : <Medal size={14} />}
-            </div>
-          )}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-orbitron), sans-serif',
-                  fontSize: "clamp(0.45rem, 1vw, 0.55rem)",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                {project.year}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-orbitron), sans-serif',
-                  fontSize: "clamp(0.4rem, 0.9vw, 0.5rem)",
-                  color: podiumColor,
-                  letterSpacing: "0.08em",
-                  fontWeight: 700,
-                }}
-              >
-                P{project.position}
-              </span>
-            </div>
-            <h3
+            />
+            <span
               style={{
+                position: "relative",
                 fontFamily: 'var(--font-orbitron), sans-serif',
-                fontWeight: 800,
-                fontSize: isTop3 ? "clamp(0.85rem, 1.8vw, 1rem)" : "clamp(0.75rem, 1.5vw, 0.88rem)",
-                marginTop: "0.15rem",
-                letterSpacing: "0.04em",
+                fontWeight: 900,
+                fontSize: "0.8rem",
+                color: statusCfg.color,
+                letterSpacing: "0.02em",
               }}
             >
-              {project.title}
-            </h3>
+              T{corner}
+            </span>
           </div>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <a
-            href={project.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
-          >
-            <GithubIcon size={14} />
-          </a>
-          <a
-            href={project.live}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--red-light)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
-          >
-            <ExternalLink size={14} />
-          </a>
-        </div>
-      </div>
-
-      <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.75rem, 1.3vw, 0.82rem)", lineHeight: 1.6, flex: 1 }}>
-        {project.shortDesc}
-      </p>
-
-      {/* Tech badges */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-        {project.tech.map((t) => (
-          <span
-            key={t}
+          <p
+            className="tabular-nums"
             style={{
-              background: "var(--red-dim)",
-              border: "1px solid var(--border-red)",
-              color: "var(--red-light)",
-              fontSize: "clamp(0.5rem, 1vw, 0.6rem)",
-              fontFamily: 'var(--font-orbitron), sans-serif',
-              fontWeight: 500,
-              letterSpacing: "0.04em",
-              padding: "0.15rem 0.45rem",
-              borderRadius: "2px",
+              textAlign: "center",
+              marginTop: "0.4rem",
+              fontFamily: 'var(--font-ui)',
+              fontSize: "0.58rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              color: "var(--text-muted)",
             }}
           >
-            {t}
-          </span>
-        ))}
-      </div>
+            {project.year}
+          </p>
+        </div>
 
-      {/* View detail */}
-      <Link
-        href={`/projects/${project.slug}`}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.35rem",
-          color: "var(--red-light)",
-          fontSize: "clamp(0.6rem, 1.2vw, 0.72rem)",
-          fontFamily: 'var(--font-orbitron), sans-serif',
-          fontWeight: 600,
-          textDecoration: "none",
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-        }}
-      >
-        Read more <ArrowRight size={12} />
-      </Link>
+        <div style={{ gridColumn: "2", gridRow: "1" }} className={even ? "md:col-start-1" : "md:col-start-3"}>
+          <div
+            className="card-brutal"
+            style={{ padding: "clamp(1.1rem, 2.5vw, 1.5rem)", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", overflow: "hidden" }}
+          >
+            <div className="tape-line" style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: statusCfg.color }} />
+            {project.image && (
+              <div className="img-zoom" style={{ position: "relative", width: "100%", height: "clamp(140px, 26vw, 200px)", background: "var(--bg-secondary)", marginBottom: "0.25rem" }}>
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <span
+                  className="sticker"
+                  style={{
+                    position: "absolute",
+                    bottom: "0.5rem",
+                    left: "0.5rem",
+                    background: "var(--yellow)",
+                    color: "#0a0a0a",
+                    fontSize: "0.56rem",
+                    padding: "0.25rem 0.55rem",
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-ui)',
+                    letterSpacing: "0.14em",
+                    transform: "rotate(0deg)",
+                  }}
+                >
+                  T{corner} · {project.year}
+                </span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
+              <h3 style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.9rem, 2vw, 1.15rem)", letterSpacing: "0.02em" }}>
+                {project.title}
+              </h3>
+              <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
+                  <GithubIcon size={14} />
+                </a>
+                <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                background: statusCfg.bg,
+                border: `1px solid ${statusCfg.border}`,
+                padding: "0.25rem 0.6rem",
+                alignSelf: "flex-start",
+              }}
+            >
+              <span style={{ width: "7px", height: "7px", background: statusCfg.color, boxShadow: `0 0 6px ${statusCfg.color}66` }} />
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: "clamp(0.44rem, 0.8vw, 0.54rem)", fontWeight: 800, letterSpacing: "0.12em", color: statusCfg.color }}>
+                {statusCfg.label}
+              </span>
+            </div>
+            <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.75rem, 1.3vw, 0.84rem)", lineHeight: 1.6, flex: 1 }}>
+              {project.shortDesc}
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+              {project.tech.map((t) => (
+                <span
+                  key={t}
+                  className="chip-square"
+                  style={{
+                    background: "var(--red-dim)",
+                    border: "1px solid var(--border-red)",
+                    color: "var(--red-light)",
+                    fontSize: "clamp(0.5rem, 1vw, 0.6rem)",
+                    fontFamily: 'var(--font-ui)',
+                    fontWeight: 500,
+                    letterSpacing: "0.04em",
+                    padding: "0.2rem 0.5rem",
+                  }}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+            <Link
+              href={`/projects/${project.slug}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                color: "var(--red-light)",
+                fontSize: "clamp(0.58rem, 1.1vw, 0.68rem)",
+                fontFamily: 'var(--font-ui)',
+                fontWeight: 700,
+                textDecoration: "none",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              Read more <ArrowRight size={12} />
+            </Link>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }

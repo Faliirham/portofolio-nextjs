@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import type { Config } from "@/lib/types";
 
@@ -16,6 +16,7 @@ export default function Navbar({ config }: { config: Config }) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const { scrollYProgress } = useScroll();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -42,6 +43,11 @@ export default function Navbar({ config }: { config: Config }) {
 
   return (
     <>
+      <motion.div
+        className="scroll-progress"
+        style={{ scaleX: scrollYProgress }}
+        aria-hidden="true"
+      />
       <motion.header
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -102,15 +108,14 @@ export default function Navbar({ config }: { config: Config }) {
               <a
                 key={l.href}
                 href={l.href}
+                className={`nav-link${active === l.href ? " is-active" : ""}`}
                 style={{
-                  fontSize: "0.72rem",
-                  fontFamily: 'var(--font-orbitron), sans-serif',
+                  fontSize: "0.74rem",
+                  fontFamily: 'var(--font-ui)',
                   fontWeight: 500,
-                  letterSpacing: "0.08em",
-                  color: active === l.href ? "var(--text-primary)" : "var(--text-secondary)",
+                  letterSpacing: "0.06em",
                   textDecoration: "none",
                   position: "relative",
-                  transition: "color 0.2s",
                   textTransform: "uppercase",
                 }}
               >
@@ -119,11 +124,12 @@ export default function Navbar({ config }: { config: Config }) {
                     layoutId="nav-active"
                     style={{
                       position: "absolute",
-                      bottom: "-4px",
+                      bottom: "-8px",
                       left: 0,
                       right: 0,
-                      height: "2px",
-                      background: "var(--red)",
+                      height: "6px",
+                      background: "var(--yellow)",
+                      boxShadow: "0 0 12px rgba(251, 191, 36, 0.4)",
                     }}
                   />
                 )}
@@ -133,21 +139,7 @@ export default function Navbar({ config }: { config: Config }) {
 
             <a
               href="#contact"
-              style={{
-                fontFamily: 'var(--font-orbitron), sans-serif',
-                background: "var(--red)",
-                color: "#fff",
-                fontSize: "0.68rem",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                padding: "0.45rem 1rem",
-                borderRadius: "2px",
-                textDecoration: "none",
-                transition: "background 0.2s",
-                textTransform: "uppercase",
-              }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.background = "var(--red-light)")}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.background = "var(--red)")}
+              className="btn btn-primary btn-sm"
             >
               Hire Me
             </a>
@@ -198,13 +190,13 @@ export default function Navbar({ config }: { config: Config }) {
                 key={l.href}
                 href={l.href}
                 onClick={() => setMenuOpen(false)}
+                className="nav-link"
                 style={{
-                  color: "var(--text-secondary)",
                   textDecoration: "none",
                   fontSize: "0.8rem",
-                  fontFamily: 'var(--font-orbitron), sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   fontWeight: 500,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.06em",
                   textTransform: "uppercase",
                 }}
               >
@@ -214,19 +206,7 @@ export default function Navbar({ config }: { config: Config }) {
             <a
               href="#contact"
               onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: 'var(--font-orbitron), sans-serif',
-                background: "var(--red)",
-                color: "#fff",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                padding: "0.6rem 1.2rem",
-                borderRadius: "2px",
-                textDecoration: "none",
-                textAlign: "center",
-                textTransform: "uppercase",
-              }}
+              className="btn btn-primary btn-block"
             >
               Hire Me
             </a>

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Orbitron } from "next/font/google";
+import { Space_Grotesk, Orbitron } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-grotesk",
   display: "swap",
 });
 
@@ -44,8 +44,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${orbitron.variable}`} suppressHydrationWarning>
-      <body>{children}</body>
+    <html lang="en" className={`${spaceGrotesk.variable} ${orbitron.variable}`} suppressHydrationWarning>
+      <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
+        <div className="grain-overlay" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   );
 }

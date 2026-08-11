@@ -27,7 +27,7 @@ export default async function ProjectPage({ params }: Props) {
   if (!project) notFound();
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)", padding: "5rem 0" }}>
+    <main id="main" style={{ minHeight: "100dvh", background: "var(--bg-primary)", color: "var(--text-primary)", padding: "5rem 0" }}>
       <div className="container-custom" style={{ maxWidth: "720px" }}>
         <Link href="/#projects" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "var(--text-muted)", textDecoration: "none", fontSize: "0.82rem", marginBottom: "3rem", transition: "color 0.2s" }}>
           <ArrowLeft size={14} /> Back to projects
@@ -51,24 +51,24 @@ export default async function ProjectPage({ params }: Props) {
                   }}
                 >
                   <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: sc.color, boxShadow: `0 0 6px ${sc.color}66` }} />
-                  <span style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.1em", color: sc.color }}>
+                  <span style={{ fontFamily: 'var(--font-ui)', fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.1em", color: sc.color }}>
                     {sc.label}
                   </span>
                 </span>
               );
             })()}
           </div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.04em", marginTop: "0.25rem", marginBottom: "1rem" }}>
+          <h1 style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "0.01em", marginTop: "0.25rem", marginBottom: "1rem" }}>
             {project.title}
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.6 }}>{project.shortDesc}</p>
         </div>
 
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "3rem" }}>
-          <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
+          <a href={project.github} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: "0.55rem 1rem", fontSize: "0.72rem" }}>
             <GithubIcon size={14} /> GitHub
           </a>
-          <a href={project.live} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--red)", color: "#fff", padding: "0.55rem 1rem", borderRadius: "2px", textDecoration: "none", fontSize: "0.82rem" }}>
+          <a href={project.live} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: "0.55rem 1rem", fontSize: "0.72rem" }}>
             <ExternalLink size={14} /> Live Demo
           </a>
         </div>
