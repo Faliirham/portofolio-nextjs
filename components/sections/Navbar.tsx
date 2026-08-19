@@ -103,7 +103,7 @@ export default function Navbar({ config }: { config: Config }) {
           </a>
 
           {/* Desktop nav */}
-          <nav style={{ display: "flex", alignItems: "center", gap: "1.5rem" }} className="hidden md:flex">
+          <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }} className="hidden lg:flex">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -146,15 +146,19 @@ export default function Navbar({ config }: { config: Config }) {
           </nav>
 
           {/* Mobile burger */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} className="md:hidden">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} className="lg:hidden">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
               style={{
                 background: "none",
                 border: "none",
                 color: "var(--text-primary)",
                 cursor: "pointer",
-                padding: "0.25rem",
+                padding: "0.75rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -198,6 +202,7 @@ export default function Navbar({ config }: { config: Config }) {
                   fontWeight: 500,
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
+                  padding: "0.35rem 0",
                 }}
               >
                 {l.label}
