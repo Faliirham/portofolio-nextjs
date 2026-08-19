@@ -61,9 +61,13 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
       whileInView={{ opacity: 1, y: 0, rotateX: PLANE_TILT_X }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      className="cm-map-scroll"
       style={{ perspective: 1100, transformStyle: "preserve-3d", transformOrigin: "center" }}
     >
-      <div style={{ position: "relative", transform: `rotateZ(${PLANE_TILT_Z}deg)`, transformStyle: "preserve-3d" }}>
+      <div
+        className="cm-map-inner"
+        style={{ position: "relative", transform: `rotateZ(${PLANE_TILT_Z}deg)`, transformStyle: "preserve-3d" }}
+      >
         {/* Floor glow */}
         <div
           aria-hidden="true"
@@ -169,7 +173,13 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
                 type="button"
                 aria-label={`Go to project ${pr.title} (corner T${i + 1})`}
                 title={`${pr.title} — T${i + 1}`}
-                onClick={() => jumpTo(pr.slug)}
+                onClick={(e) => {
+                  if ((e.nativeEvent as PointerEvent).pointerType === "touch") {
+                    setHoveredSlug((cur) => (cur === pr.slug ? null : pr.slug));
+                  } else {
+                    jumpTo(pr.slug);
+                  }
+                }}
                 onMouseEnter={(e) => {
                   setHoveredSlug(pr.slug);
                   e.currentTarget.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1.18)";
@@ -181,13 +191,12 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
                   e.currentTarget.style.boxShadow =
                     pr.status === "ongoing" ? "0 0 16px var(--red-glow)" : "2px 2px 0 rgba(0,0,0,0.55)";
                 }}
+                className="cm-chip"
                 style={{
                   position: "absolute",
                   left: toPct(m.x, true),
                   top: toPct(m.y, false),
                   transform: "translate(-50%, -50%) rotate(45deg)",
-                  width: "38px",
-                  height: "38px",
                   background: hoveredSlug === pr.slug ? "var(--red)" : "var(--bg-card)",
                   border: `2px solid ${hoveredSlug === pr.slug ? "#fff" : color}`,
                   boxShadow:
@@ -367,6 +376,14 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
       </div>
 
       <style>{`
+        .cm-map-scroll { overflow-x: auto; scrollbar-width: thin; }
+        .cm-map-inner { min-width: 100%; }
+        .cm-chip { width: 38px; height: 38px; }
+        @media (max-width: 767px) {
+          .cm-map-inner { min-width: 540px; }
+          .cm-chip { width: 30px; height: 30px; }
+          .cm-chip > span { font-size: 0.55rem; }
+        }
         .cm-lap-progress {
           stroke-dasharray: 1000;
           stroke-dashoffset: 1000;
