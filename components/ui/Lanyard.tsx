@@ -25,6 +25,17 @@ const CARD_H = 1.125;
 const CARD_D = 0.035;
 const CARD_JOINT_OFFSET = CARD_H / 2 - 0.03;
 const TEXTURE_SCALE = 1100 / 64;
+const GRAVITY: [number, number, number] = [0, -9.81, 0];
+
+function getBodyTranslation(body: RapierRigidBody | null | undefined): THREE.Vector3 | null {
+  if (!body) return null;
+  try {
+    const t = body.translation();
+    return new THREE.Vector3(t.x, t.y, t.z);
+  } catch {
+    return null;
+  }
+}
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
@@ -347,21 +358,26 @@ const geometry = useMemo(() => new MeshLineGeometry(), []);
   }, [size.width, size.height]);
   const anchorPos = useMemo(() => new THREE.Vector3(0, ANCHOR_Y, 0), []);
 
-  useFrame(() => {
+useFrame(() => {
     const points: THREE.Vector3[] = [];
     for (let i = 0; i < count; i++) {
-      const body = refs[i]?.current;
-      if (body) {
-        const t = body.translation();
-        points.push(new THREE.Vector3(t.x, t.y, t.z));
+      const p = getBodyTranslation(refs[i]?.current);
+      if (p) {
+        points.push(p);
       } else {
         points.push(anchorPos.clone());
       }
     }
     const card = cardRef.current;
     if (card) {
-      const t = card.translation();
-      const q = card.rotation();
+      let t: { x: number; y: number; z: number } | null = null;
+      let q: { x: number; y: number; z: number; w: number } | null = null;
+      try {
+        t = card.translation();
+        q = card.rotation();
+      } catch {
+        return;
+      }
       const off = new THREE.Vector3(0, CARD_JOINT_OFFSET, 0).applyQuaternion(q);
       points.push(new THREE.Vector3(t.x + off.x, t.y + off.y, t.z + off.z));
     }
@@ -422,17 +438,21 @@ function DragController({
     };
   }, [gl, pointerScreenRef, pointerActiveRef, draggingRef]);
 
-  useFrame((state, dt) => {
+useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
 
-    refs.forEach((r, i) => {
-      const body = r?.current;
-      if (!body) return;
-      body.applyImpulse(
-        { x: Math.sin(t * 1.2 + i * 0.6) * 0.003, y: 0, z: Math.cos(t * 0.9 + i * 0.4) * 0.003 },
-        true
-      );
-    });
+    try {
+      refs.forEach((r, i) => {
+        const body = r?.current;
+        if (!body) return;
+        body.applyImpulse(
+          { x: Math.sin(t * 1.2 + i * 0.6) * 0.003, y: 0, z: Math.cos(t * 0.9 + i * 0.4) * 0.003 },
+          true
+        );
+      });
+    } catch {
+      return;
+    }
 
     if (!pointerActiveRef.current) return;
     const rect = gl.domElement.getBoundingClientRect();
@@ -446,28 +466,48 @@ function DragController({
     if (draggingRef.current) {
       const card = cardRef.current;
       if (!card) return;
-      const pos = card.translation();
+      let pos: { x: number; y: number; z: number } | null = null;
+      let v: { x: number; y: number; z: number } | null = null;
+      let mass = 0;
+      try {
+        pos = card.translation();
+        v = card.linvel();
+        mass = card.mass();
+      } catch {
+        return;
+      }
       const dx = hit.x - pos.x;
       const dy = hit.y - pos.y;
       const d = Math.hypot(dx, dy);
       if (d > 0.02) {
-        const mass = card.mass();
         const k = Math.min(40 * dt, 0.9) * mass;
-        card.applyImpulse({ x: dx * k, y: dy * k, z: 0 }, true);
-        const v = card.linvel();
-        card.applyImpulse({ x: -v.x * mass * 0.15, y: -v.y * mass * 0.15, z: -v.z * mass * 0.15 }, true);
+        try {
+          card.applyImpulse({ x: dx * k, y: dy * k, z: 0 }, true);
+          card.applyImpulse({ x: -v.x * mass * 0.15, y: -v.y * mass * 0.15, z: -v.z * mass * 0.15 }, true);
+        } catch {
+          return;
+        }
       }
     } else {
       refs.forEach((r) => {
         const body = r?.current;
         if (!body) return;
-        const pos = body.translation();
+        let pos: { x: number; y: number; z: number } | null = null;
+        try {
+          pos = body.translation();
+        } catch {
+          return;
+        }
         const dx = pos.x - hit.x;
         const dy = pos.y - hit.y;
         const d = Math.hypot(dx, dy);
         if (d < 0.32 && d > 0.001) {
           const f = (0.32 - d) * 0.02;
-          body.applyImpulse({ x: (dx / d) * f, y: (dy / d) * f, z: 0 }, true);
+          try {
+            body.applyImpulse({ x: (dx / d) * f, y: (dy / d) * f, z: 0 }, true);
+          } catch {
+            return;
+          }
         }
       });
     }
@@ -573,7 +613,7 @@ export default function Lanyard({ config }: { config: Config }) {
       {reduced ? (
         <StaticLanyard config={config} count={count} />
       ) : (
-        <Physics gravity={[0, -9.81, 0]}>
+        <Physics gravity={GRAVITY}>
           <AnchorClip anchorRef={anchorRef} />
           {Array.from({ length: count }).map((_, i) => (
             <ChainLink
