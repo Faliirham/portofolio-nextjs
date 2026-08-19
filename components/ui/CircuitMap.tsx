@@ -185,11 +185,8 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
                   e.currentTarget.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1.18)";
                   e.currentTarget.style.boxShadow = `0 0 20px ${statusCfg.color}88`;
                 }}
-                onMouseLeave={(e) => {
-                  setHoveredSlug((cur) => (cur === pr.slug ? null : cur));
-                  e.currentTarget.style.transform = "translate(-50%, -50%) rotate(45deg)";
-                  e.currentTarget.style.boxShadow =
-                    pr.status === "ongoing" ? "0 0 16px var(--red-glow)" : "2px 2px 0 rgba(0,0,0,0.55)";
+                onMouseLeave={() => {
+                  setHoveredSlug(null);
                 }}
                 className="cm-chip"
                 style={{
@@ -243,16 +240,17 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
                   position: "absolute",
                   left: toPct(hoveredMark.x, true),
                   top: toPct(hoveredMark.y, false),
-                  transform: `translate(-50%, calc(-100% - 30px)) rotateX(${-PLANE_TILT_X}deg) rotateZ(${-PLANE_TILT_Z}deg)`,
+                  transform: `translate(-50%, calc(-100% - 24px)) rotateX(${-PLANE_TILT_X}deg) rotateZ(${-PLANE_TILT_Z}deg)`,
                   transformOrigin: "bottom center",
-                  width: "min(240px, 72vw)",
-                  zIndex: 5,
+                  width: "min(260px, 80vw)",
+                  zIndex: 20,
+                  pointerEvents: "auto",
                 }}
-                onMouseEnter={() => setHoveredSlug(null)}
+                onMouseEnter={() => setHoveredSlug(hoveredProject.slug)}
+                onMouseLeave={() => setHoveredSlug(null)}
               >
                 <Link
                   href={`/projects/${hoveredProject.slug}`}
-                  onMouseEnter={() => setHoveredSlug(null)}
                   style={{ textDecoration: "none", display: "block", cursor: "pointer" }}
                 >
                   <div

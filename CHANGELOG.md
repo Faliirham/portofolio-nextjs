@@ -2,9 +2,32 @@
 
 Semua perubahan signifikan pada portfolio ini akan dicatat di file ini.
 
-Catatan: seluruh commit di bawah **belum di-push** ke remote — tunggu review manual terlebih dahulu.
-
 ## [Unreleased] — 2026-08-19
+
+### Responsive Layout Overrides — Circuit, Navbar & Lanyard
+
+- **`fix(responsive): replace inline grid styles with CSS override classes in projects circuit`**
+  - Layout racing line, corner rows, node, dan card di `Projects.tsx` dipindah dari inline styles (yang override modifier Tailwind karena spesifisitas inline > class) ke class CSS baru di `app/globals.css`: `.circuit-spine`, `.circuit-row-grid`, `.circuit-node`, `.circuit-card--even/odd`, `.sector-label`.
+  - Posisi spine kini responsive (`left: clamp(22px, 6vw, 28px)` di mobile, `50%` di ≥768px); paddings pakai `clamp()` agar proporsional di semua ukuran layar.
+  - `html` dan `body` ditambah `overflow-x: hidden` + `width: 100%` untuk mencegah horizontal scroll tak diinginkan dari dekorasi absolut.
+
+- **`fix(navbar): remove inline display:flex that broke responsive breakpoints`**
+  - Inline `display: "flex"` di nav desktop dan burger mobile dihapus — sebelumnya mengalahkan class Tailwind `hidden lg:flex` / `lg:hidden` (nav kepotong / burger salah tampil di 768–1024px).
+
+- **`fix(hero): constrain lanyard frame on mobile via CSS classes`**
+  - `Hero.tsx` memakai class baru `.hero-lanyard-frame` (height `clamp(340px, 52vw, 520px)`, `max-height: 360px` di <768px) dan `.hero-lanyard-col` (max-width 320px, centered) untuk membatasi tinggi kartu di layar kecil.
+  - `Lanyard.tsx`: BOM di awal file dihapus; Canvas kini mengisi `width/height: 100%` mengikuti frame.
+
+- **`fix(about): correct rider decal shadow and normalize rider number prefix`**
+  - Variabel `--bg-dark` (tidak ada) diganti `--bg-primary` pada box-shadow decal; posisi decal disesuaikan; nomor rider di-render konsisten (`#05` vs `05` → selalu dengan `#`).
+
+- **`fix(circuit-map): keep hover tooltip open and enlarge on desktop`**
+  - Tooltip proyek kini `pointerEvents: auto` dengan handler `onMouseEnter`/`onMouseLeave` sendiri — tidak hilang saat kursor berpindah ke tooltip; lebar ditambah (260px / 80vw) dan z-index dinaikkan agar tak terpotong konten lain.
+
+- **`fix(contact): remove duplicate pulse keyframes`**
+  - `@keyframes pulse` inline di `Contact.tsx` dihapus (sudah didefinisikan global di `globals.css`).
+
+### Dependencies & Komponen Animasi
 
 ### Dependencies & Komponen Animasi
 

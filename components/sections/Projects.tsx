@@ -85,16 +85,15 @@ export default function Projects({ projects }: { projects: Project[] }) {
           {/* Racing line spine */}
           <div
             aria-hidden="true"
+            className="circuit-spine"
             style={{
               position: "absolute",
-              left: "28px",
               top: "-8px",
               bottom: "-8px",
               width: "3px",
               background: "repeating-linear-gradient(180deg, var(--red) 0 10px, transparent 10px 18px)",
               opacity: 0.55,
             }}
-            className="md:left-1/2 md:-translate-x-1/2"
           />
 
           {initial.map((project, i) => {
@@ -104,16 +103,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
               <div key={project.slug} data-circuit-row id={`row-${project.slug}`} style={{ scrollMarginTop: "90px" }}>
                 {/* Sector label (between corners) */}
                 {i > 0 && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.75rem",
-                      margin: "0.25rem 0 2rem",
-                      paddingLeft: "4rem",
-                    }}
-                    className="md:px-0"
-                  >
+                  <div className="sector-label">
                     <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
                     <span
                       style={{
@@ -133,21 +123,9 @@ export default function Projects({ projects }: { projects: Project[] }) {
                 )}
 
                 {/* Corner row */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "56px 1fr",
-                    gap: "0.9rem",
-                    alignItems: "center",
-                    marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
-                  }}
-                  className="md:grid-cols-[1fr_72px_1fr] md:gap-10"
-                >
+                <div className="circuit-row-grid">
                   {/* Corner node */}
-                  <div
-                    style={{ gridColumn: "1", gridRow: "1", justifySelf: "center", position: "relative", zIndex: 1 }}
-                    className="md:col-start-2"
-                  >
+                  <div className="circuit-node">
                     <div style={{ position: "relative", width: "52px", height: "52px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <div
                         style={{
@@ -190,10 +168,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                   </div>
 
                   {/* Corner card */}
-                  <div
-                    style={{ gridColumn: "2", gridRow: "1" }}
-                    className={even ? "md:col-start-1" : "md:col-start-3"}
-                  >
+                  <div className={even ? "circuit-card circuit-card--even" : "circuit-card circuit-card--odd"}>
                     <div
                       className="card-brutal"
                       style={{ padding: "clamp(1.1rem, 2.5vw, 1.5rem)", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", overflow: "hidden" }}
@@ -450,7 +425,7 @@ function CircuitRow({
           alignItems: "center",
           gap: "0.75rem",
           margin: "0.25rem 0 2rem",
-          paddingLeft: "4rem",
+          paddingLeft: "clamp(2rem, 6vw, 4rem)",
         }}
         className="md:px-0"
       >
@@ -474,8 +449,8 @@ function CircuitRow({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "56px 1fr",
-          gap: "0.9rem",
+          gridTemplateColumns: "clamp(46px, 12vw, 56px) 1fr",
+          gap: "clamp(0.6rem, 2vw, 1rem)",
           alignItems: "center",
           marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
         }}

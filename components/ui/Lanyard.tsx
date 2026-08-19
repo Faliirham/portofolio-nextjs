@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useMemo, useRef, useState, createRef, type RefObject, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -605,7 +605,7 @@ export default function Lanyard({ config }: { config: Config }) {
       camera={{ position: [0, 0.2, 3.5], fov: 45 }}
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
-      style={{ touchAction: "none", cursor: "grab", display: "block" }}
+      style={{ touchAction: "none", cursor: "grab", display: "block", width: "100%", height: "100%" }}
     >
       <ambientLight intensity={0.55} />
       <directionalLight position={[2.5, 3, 4]} intensity={1.1} />

@@ -103,7 +103,7 @@ export default function Navbar({ config }: { config: Config }) {
           </a>
 
           {/* Desktop nav */}
-          <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }} className="hidden lg:flex">
+          <nav style={{ alignItems: "center", gap: "1.25rem" }} className="hidden lg:flex">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -146,7 +146,7 @@ export default function Navbar({ config }: { config: Config }) {
           </nav>
 
           {/* Mobile burger */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} className="lg:hidden">
+          <div style={{ alignItems: "center", gap: "0.5rem" }} className="flex lg:hidden">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}

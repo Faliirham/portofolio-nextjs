@@ -178,12 +178,12 @@ export default function About({ section, config }: { section: AboutSection; conf
                     style={{
                       position: "absolute",
                       top: "clamp(-22px, -2vw, -16px)",
-                      right: "clamp(-14px, -1vw, -8px)",
+                      right: "clamp(-4px, 0vw, 4px)",
                       zIndex: 2,
                       background: "var(--yellow)",
                       border: "1px solid var(--text-primary)",
                       padding: "0.45rem 0.7rem",
-                      boxShadow: "0 0 0 4px var(--bg-dark), 4px 4px 0 rgba(0,0,0,0.55)",
+                      boxShadow: "0 0 0 4px var(--bg-primary), 4px 4px 0 rgba(0,0,0,0.55)",
                     }}
                   >
                     <span
@@ -199,7 +199,7 @@ export default function About({ section, config }: { section: AboutSection; conf
                         alignItems: "center",
                       }}
                     >
-                      <span style={{ color: "var(--red)" }}>#{config.riderNumber}</span>
+                      <span style={{ color: "var(--red)" }}>{config.riderNumber.startsWith("#") ? config.riderNumber : `#${config.riderNumber}`}</span>
                       <span>{config.name.split(" ")[0].toUpperCase()}</span>
                     </span>
                   </motion.div>

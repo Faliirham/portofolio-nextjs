@@ -352,16 +352,16 @@ export default function Hero({ config }: { config: Config }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.5 }}
+            className="hero-lanyard-col"
             style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}
           >
             <div style={{ width: "100%", maxWidth: 380 }}>
               <div
+                className="hero-lanyard-frame"
                 style={{
                   position: "relative",
                   width: "100%",
                   height: "clamp(380px, 52vw, 520px)",
-                  display: "flex",
-                  justifyContent: "center",
                 }}
               >
                 <div
@@ -391,7 +391,9 @@ export default function Hero({ config }: { config: Config }) {
                     }}
                   />
                 </div>
-                <Lanyard config={config} />
+                <div style={{ position: "absolute", inset: 0, zIndex: 2 }}>
+                  <Lanyard config={config} />
+                </div>
               </div>
             </div>
           </motion.div>
