@@ -1,24 +1,30 @@
-"use client";
-import { useEffect, useRef } from "react";
+﻿"use client";
+import { useEffect, useMemo, useRef, useState, createRef, type RefObject, type MutableRefObject } from "react";
+import * as THREE from "three";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+  Physics,
+  RigidBody,
+  CapsuleCollider,
+  CuboidCollider,
+  useSphericalJoint,
+  useRevoluteJoint,
+  type RapierRigidBody,
+} from "@react-three/rapier";
+import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import type { Config } from "@/lib/types";
 
-const W = 300;
-const H = 280;
-const SEGMENTS = 13;
-const SEG_LEN = 13;
-const GRAVITY = 0.9;
-const DAMPING = 0.942;
-const PUSH_RADIUS = 82;
-const PUSH_FORCE = 1.15;
-const GRAB_RADIUS = 82;
-const ANCHOR = { x: 0.58, y: 0.04 };
-
-interface Pt {
-  x: number;
-  y: number;
-  px: number;
-  py: number;
-}
+const LINKS_DESKTOP = 8;
+const LINKS_MOBILE = 6;
+const SPACING = 0.17;
+const CAPSULE_R = 0.032;
+const CAPSULE_HALF = 0.06;
+const ANCHOR_Y = 1.25;
+const CARD_W = 0.75;
+const CARD_H = 1.125;
+const CARD_D = 0.035;
+const CARD_JOINT_OFFSET = CARD_H / 2 - 0.03;
+const TEXTURE_SCALE = 1100 / 64;
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
@@ -34,51 +40,16 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-function drawStrap(ctx: CanvasRenderingContext2D, pts: Pt[]) {
-  if (pts.length < 2) return;
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length - 1; i++) {
-    const xc = (pts[i].x + pts[i + 1].x) / 2;
-    const yc = (pts[i].y + pts[i + 1].y) / 2;
-    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
-  }
-  ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-
-  ctx.strokeStyle = "rgba(18,18,18,0.95)";
-  ctx.lineWidth = 6;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(225,29,72,0.9)";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(255,255,255,0.35)";
-  ctx.lineWidth = 1;
-  ctx.setLineDash([2, 7]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.lineCap = "butt";
-}
-
-function drawCard(ctx: CanvasRenderingContext2D, tail: Pt, second: Pt, cfg: Config) {
-  const w = 46;
-  const h = 68;
-  const angle = Math.atan2(tail.y - second.y, tail.x - second.x) + Math.PI / 2;
-
-  ctx.save();
-  ctx.translate(tail.x, tail.y);
-  ctx.rotate(angle);
+function drawIdCard(ctx: CanvasRenderingContext2D, cfg: Config, photo: HTMLImageElement | null) {
+  const w = 64;
+  const h = 96;
 
   ctx.fillStyle = "#0a0a0a";
   ctx.beginPath();
-  ctx.arc(0, -h / 2 + 12, 3.5, 0, Math.PI * 2);
+  ctx.arc(0, -h / 2 + 12, 4, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = "#fbbf24";
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.4;
   ctx.stroke();
 
   const bx = -w / 2;
@@ -86,214 +57,552 @@ function drawCard(ctx: CanvasRenderingContext2D, tail: Pt, second: Pt, cfg: Conf
   roundRect(ctx, bx, by, w, h - 8, 6);
   ctx.fillStyle = "#161616";
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.3)";
+  ctx.strokeStyle = "rgba(255,255,255,0.32)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  roundRect(ctx, bx, by, w, 15, 6);
+  roundRect(ctx, bx, by, w, 17, 6);
   ctx.fillStyle = "#e11d48";
   ctx.fill();
 
   ctx.fillStyle = "#fff";
-  ctx.font = "800 8px system-ui";
+  ctx.font = "800 9px system-ui";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(cfg.riderNumber.toUpperCase(), 0, by + 7.5);
+  ctx.fillText(cfg.riderNumber.toUpperCase(), bx + 24, by + 8.5);
 
-  const initials = cfg.name
-    .split(" ")
-    .map((s) => s[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.font = "700 6px system-ui";
+  ctx.fillText("PIT CREW", bx + w - 28, by + 8.5);
+
+  const photoY = by + 24;
+  const photoH = h - 8 - 24 - 30;
+  if (photo && photo.width > 0) {
+    ctx.save();
+    roundRect(ctx, bx + 7, photoY, w - 14, photoH, 4);
+    ctx.clip();
+    const s = Math.max((w - 14) / photo.width, photoH / photo.height);
+    const pw = photo.width * s;
+    const ph = photo.height * s;
+    ctx.drawImage(photo, bx + 7 + (w - 14 - pw) / 2, photoY + (photoH - ph) / 2, pw, ph);
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, bx + 7, photoY, w - 14, photoH, 4);
+    ctx.stroke();
+  } else {
+    const initials = cfg.name
+      .split(" ")
+      .map((s) => s[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+    ctx.fillStyle = "#2a2a2a";
+    roundRect(ctx, bx + 7, photoY, w - 14, photoH, 4);
+    ctx.fill();
+    ctx.fillStyle = "rgba(245,245,245,0.4)";
+    ctx.font = "900 22px system-ui";
+    ctx.fillText(initials, 0, photoY + photoH / 2 + 7);
+  }
+
   ctx.fillStyle = "#f5f5f5";
-  ctx.font = "900 17px system-ui";
-  ctx.fillText(initials, 0, by + 15 + 13);
+  ctx.font = "800 10px system-ui";
+  ctx.fillText(cfg.name.toUpperCase(), 0, photoY + photoH + 13);
 
-  ctx.fillStyle = "rgba(245,245,245,0.75)";
-  ctx.font = "600 7px system-ui";
-  ctx.fillText(cfg.name.split(" ")[0].toUpperCase(), 0, by + 15 + 25);
+  ctx.fillStyle = "rgba(245,245,245,0.7)";
+  ctx.font = "600 6.5px system-ui";
+  ctx.fillText(cfg.role.toUpperCase(), 0, photoY + photoH + 22);
 
-  const cells = 8;
+  const cells = 10;
   const cellW = (w - 8) / cells;
   for (let i = 0; i < cells; i++) {
     ctx.fillStyle = Math.floor(i / 2) % 2 === 0 ? "#f5f5f5" : "#0a0a0a";
     ctx.fillRect(bx + 4 + i * cellW, by + (h - 8) - 7, cellW, 7);
   }
+}
 
-  ctx.restore();
+function useCardTexture(config: Config) {
+  const [texture] = useState(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1100;
+    canvas.height = Math.round(96 * TEXTURE_SCALE);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.scale(TEXTURE_SCALE, TEXTURE_SCALE);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    drawIdCard(ctx, config, null);
+    return { tex, ctx, canvas };
+  });
+
+  useEffect(() => {
+    if (!texture) return;
+    const { tex, ctx } = texture;
+    if (!config.avatar) return;
+    const img = new Image();
+    img.src = config.avatar;
+    img.decoding = "async";
+    let disposed = false;
+    img.onload = () => {
+      if (disposed) return;
+      ctx.clearRect(0, 0, 64, 96);
+      drawIdCard(ctx, config, img);
+      tex.needsUpdate = true;
+    };
+    return () => {
+      disposed = true;
+    };
+  }, [config, texture]);
+
+  useEffect(
+    () => () => {
+      texture?.tex.dispose();
+    },
+    [texture]
+  );
+
+  return texture?.tex ?? null;
+}
+
+function AnchorClip({ anchorRef }: { anchorRef: RefObject<RapierRigidBody | null> }) {
+  return (
+    <>
+      <RigidBody ref={anchorRef} type="fixed" colliders={false} position={[0, ANCHOR_Y, 0]} />
+      <group position={[0, ANCHOR_Y, 0]}>
+        <mesh position={[0, 0.1, 0]}>
+          <boxGeometry args={[0.34, 0.045, 0.05]} />
+          <meshStandardMaterial color="#222222" metalness={0.45} roughness={0.5} />
+        </mesh>
+        <mesh>
+          <torusGeometry args={[0.05, 0.012, 12, 32]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.6} roughness={0.3} />
+        </mesh>
+      </group>
+    </>
+  );
+}
+
+function ChainLink({
+  position,
+  bodyRef,
+}: {
+  position: [number, number, number];
+  bodyRef: RefObject<RapierRigidBody | null>;
+}) {
+  return (
+    <RigidBody
+      ref={bodyRef}
+      position={position}
+      colliders={false}
+      mass={0.14}
+      linearDamping={1.1}
+      angularDamping={2}
+      canSleep={false}
+    >
+      <CapsuleCollider args={[CAPSULE_HALF, CAPSULE_R]} />
+      <mesh>
+        <capsuleGeometry args={[CAPSULE_R, CAPSULE_HALF * 2, 8, 16]} />
+        <meshStandardMaterial color="#1c1c1c" metalness={0.5} roughness={0.35} />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+function Card({
+  config,
+  count,
+  cardRef,
+  draggingRef,
+  pointerScreenRef,
+}: {
+  config: Config;
+  count: number;
+  cardRef: RefObject<RapierRigidBody | null>;
+  draggingRef: MutableRefObject<boolean>;
+  pointerScreenRef: MutableRefObject<{ x: number; y: number }>;
+}) {
+  const texture = useCardTexture(config);
+
+  return (
+    <RigidBody
+      ref={cardRef}
+      colliders={false}
+      mass={0.4}
+      linearDamping={1.4}
+      angularDamping={2.2}
+      canSleep={false}
+      position={[0, ANCHOR_Y - count * SPACING - (CAPSULE_HALF + SPACING / 2) - CARD_JOINT_OFFSET, 0]}
+    >
+      <CuboidCollider args={[CARD_W / 2, CARD_H / 2, CARD_D / 2]} />
+      <mesh
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          draggingRef.current = true;
+          pointerScreenRef.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
+        }}
+      >
+        <boxGeometry args={[CARD_W, CARD_H, CARD_D]} />
+        <meshStandardMaterial
+          map={texture ?? undefined}
+          roughness={0.35}
+          metalness={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+function SphericalLink({ a, b }: { a: RefObject<RapierRigidBody | null>; b: RefObject<RapierRigidBody | null> }) {
+  useSphericalJoint(a as RefObject<RapierRigidBody>, b as RefObject<RapierRigidBody>, [
+    [0, -(CAPSULE_HALF + SPACING / 2), 0],
+    [0, CAPSULE_HALF + SPACING / 2, 0],
+  ]);
+  return null;
+}
+
+function CardJoint({
+  lastLinkRef,
+  cardRef,
+}: {
+  lastLinkRef: RefObject<RapierRigidBody | null>;
+  cardRef: RefObject<RapierRigidBody | null>;
+}) {
+useRevoluteJoint(lastLinkRef as RefObject<RapierRigidBody>, cardRef as RefObject<RapierRigidBody>, [
+    [0, -(CAPSULE_HALF + SPACING / 2), 0],
+    [0, CARD_JOINT_OFFSET, 0],
+    [0, 0, 1],
+    [-1, 1],
+  ]);
+  return null;
+}
+
+function ChainJoints({
+  anchorRef,
+  refs,
+  cardRef,
+  count,
+}: {
+  anchorRef: RefObject<RapierRigidBody | null>;
+  refs: Array<RefObject<RapierRigidBody | null>>;
+  cardRef: RefObject<RapierRigidBody | null>;
+  count: number;
+}) {
+useSphericalJoint(anchorRef as RefObject<RapierRigidBody>, refs[0] as RefObject<RapierRigidBody>, [
+    [0, 0, 0],
+    [0, CAPSULE_HALF + SPACING / 2, 0],
+  ]);
+  return (
+    <>
+      {Array.from({ length: count - 1 }).map((_, i) => (
+        <SphericalLink key={i} a={refs[i]} b={refs[i + 1]} />
+      ))}
+      <CardJoint lastLinkRef={refs[count - 1]} cardRef={cardRef} />
+    </>
+  );
+}
+
+function Strap({
+  refs,
+  cardRef,
+  count,
+}: {
+  refs: Array<RefObject<RapierRigidBody | null>>;
+  cardRef: RefObject<RapierRigidBody | null>;
+  count: number;
+}) {
+  const { size } = useThree();
+const geometry = useMemo(() => new MeshLineGeometry(), []);
+  const materials = useMemo(() => {
+    const list = [
+      new MeshLineMaterial({
+        resolution: new THREE.Vector2(size.width, size.height),
+        sizeAttenuation: 1,
+        lineWidth: 0.055,
+        color: "#161616",
+        opacity: 0.95,
+      }),
+      new MeshLineMaterial({
+        resolution: new THREE.Vector2(size.width, size.height),
+        sizeAttenuation: 1,
+        lineWidth: 0.026,
+        color: "#e11d48",
+        opacity: 0.9,
+      }),
+      new MeshLineMaterial({
+        resolution: new THREE.Vector2(size.width, size.height),
+        sizeAttenuation: 1,
+        lineWidth: 0.012,
+        color: "#ffffff",
+        opacity: 0.35,
+      }),
+    ];
+    list.forEach((m) => {
+      m.transparent = true;
+      m.depthWrite = false;
+    });
+    return list;
+  }, [size.width, size.height]);
+  const anchorPos = useMemo(() => new THREE.Vector3(0, ANCHOR_Y, 0), []);
+
+  useFrame(() => {
+    const points: THREE.Vector3[] = [];
+    for (let i = 0; i < count; i++) {
+      const body = refs[i]?.current;
+      if (body) {
+        const t = body.translation();
+        points.push(new THREE.Vector3(t.x, t.y, t.z));
+      } else {
+        points.push(anchorPos.clone());
+      }
+    }
+    const card = cardRef.current;
+    if (card) {
+      const t = card.translation();
+      const q = card.rotation();
+      const off = new THREE.Vector3(0, CARD_JOINT_OFFSET, 0).applyQuaternion(q);
+      points.push(new THREE.Vector3(t.x + off.x, t.y + off.y, t.z + off.z));
+    }
+    geometry.setPoints(points);
+  });
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => materials.forEach((m) => m.dispose()), [materials]);
+
+  return (
+    <>
+      {materials.map((m, i) => (
+        <mesh key={i} geometry={geometry} material={m} />
+      ))}
+    </>
+  );
+}
+
+function DragController({
+  refs,
+  cardRef,
+  draggingRef,
+  pointerScreenRef,
+  pointerActiveRef,
+}: {
+  refs: Array<RefObject<RapierRigidBody | null>>;
+  cardRef: RefObject<RapierRigidBody | null>;
+  draggingRef: MutableRefObject<boolean>;
+  pointerScreenRef: MutableRefObject<{ x: number; y: number }>;
+  pointerActiveRef: MutableRefObject<boolean>;
+}) {
+  const { camera, gl } = useThree();
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), []);
+  const ndc = useMemo(() => new THREE.Vector2(), []);
+  const hit = useMemo(() => new THREE.Vector3(), []);
+
+  useEffect(() => {
+    const el = gl.domElement;
+    const onMove = (e: PointerEvent) => {
+      pointerScreenRef.current = { x: e.clientX, y: e.clientY };
+      pointerActiveRef.current = true;
+    };
+    const onLeave = () => {
+      pointerActiveRef.current = false;
+      draggingRef.current = false;
+    };
+    const onUp = () => {
+      draggingRef.current = false;
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [gl, pointerScreenRef, pointerActiveRef, draggingRef]);
+
+  useFrame((state, dt) => {
+    const t = state.clock.elapsedTime;
+
+    refs.forEach((r, i) => {
+      const body = r?.current;
+      if (!body) return;
+      body.applyImpulse(
+        { x: Math.sin(t * 1.2 + i * 0.6) * 0.003, y: 0, z: Math.cos(t * 0.9 + i * 0.4) * 0.003 },
+        true
+      );
+    });
+
+    if (!pointerActiveRef.current) return;
+    const rect = gl.domElement.getBoundingClientRect();
+    const p = pointerScreenRef.current;
+    if (p.x < rect.left || p.x > rect.right || p.y < rect.top || p.y > rect.bottom) return;
+
+    ndc.set(((p.x - rect.left) / rect.width) * 2 - 1, -((p.y - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    if (!raycaster.ray.intersectPlane(plane, hit)) return;
+
+    if (draggingRef.current) {
+      const card = cardRef.current;
+      if (!card) return;
+      const pos = card.translation();
+      const dx = hit.x - pos.x;
+      const dy = hit.y - pos.y;
+      const d = Math.hypot(dx, dy);
+      if (d > 0.02) {
+        const mass = card.mass();
+        const k = Math.min(40 * dt, 0.9) * mass;
+        card.applyImpulse({ x: dx * k, y: dy * k, z: 0 }, true);
+        const v = card.linvel();
+        card.applyImpulse({ x: -v.x * mass * 0.15, y: -v.y * mass * 0.15, z: -v.z * mass * 0.15 }, true);
+      }
+    } else {
+      refs.forEach((r) => {
+        const body = r?.current;
+        if (!body) return;
+        const pos = body.translation();
+        const dx = pos.x - hit.x;
+        const dy = pos.y - hit.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 0.32 && d > 0.001) {
+          const f = (0.32 - d) * 0.02;
+          body.applyImpulse({ x: (dx / d) * f, y: (dy / d) * f, z: 0 }, true);
+        }
+      });
+    }
+  });
+
+  return null;
+}
+
+function StaticLanyard({ config, count }: { config: Config; count: number }) {
+  const { size } = useThree();
+  const texture = useCardTexture(config);
+const geometry = useMemo(() => new MeshLineGeometry(), []);
+  const materials = useMemo(() => {
+    const list = [
+      new MeshLineMaterial({
+        resolution: new THREE.Vector2(size.width, size.height),
+        sizeAttenuation: 1,
+        lineWidth: 0.055,
+        color: "#161616",
+        opacity: 0.95,
+      }),
+      new MeshLineMaterial({
+        resolution: new THREE.Vector2(size.width, size.height),
+        sizeAttenuation: 1,
+        lineWidth: 0.026,
+        color: "#e11d48",
+        opacity: 0.9,
+      }),
+    ];
+    list.forEach((m) => {
+      m.transparent = true;
+      m.depthWrite = false;
+    });
+    return list;
+  }, [size.width, size.height]);
+
+  const cardY =
+    ANCHOR_Y - count * SPACING - (CAPSULE_HALF + SPACING / 2) - CARD_JOINT_OFFSET;
+
+  useEffect(() => {
+    const points: THREE.Vector3[] = [];
+    points.push(new THREE.Vector3(0, ANCHOR_Y, 0));
+    for (let i = 0; i < count; i++) {
+      points.push(new THREE.Vector3(0, ANCHOR_Y - (i + 1) * SPACING, 0));
+    }
+    points.push(new THREE.Vector3(0, cardY + CARD_JOINT_OFFSET, 0));
+    geometry.setPoints(points);
+    return () => {
+      geometry.dispose();
+      materials.forEach((m) => m.dispose());
+    };
+  }, [geometry, materials, count, cardY]);
+
+  return (
+    <>
+      {materials.map((m, i) => (
+        <mesh key={i} geometry={geometry} material={m} />
+      ))}
+      <group position={[0, ANCHOR_Y, 0]}>
+        <mesh position={[0, 0.1, 0]}>
+          <boxGeometry args={[0.34, 0.045, 0.05]} />
+          <meshStandardMaterial color="#222222" metalness={0.45} roughness={0.5} />
+        </mesh>
+        <mesh>
+          <torusGeometry args={[0.05, 0.012, 12, 32]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.6} roughness={0.3} />
+        </mesh>
+      </group>
+      <group position={[0, cardY, 0]}>
+        <mesh>
+          <boxGeometry args={[CARD_W, CARD_H, CARD_D]} />
+          <meshStandardMaterial map={texture ?? undefined} roughness={0.35} metalness={0.1} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+    </>
+  );
 }
 
 export default function Lanyard({ config }: { config: Config }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const configRef = useRef(config);
-  configRef.current = config;
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const ax = ANCHOR.x * W;
-    const ay = ANCHOR.y * H;
-
-    const pts: Pt[] = [];
-    for (let i = 0; i < SEGMENTS + 1; i++) {
-      pts.push({ x: ax, y: ay + i * 2, px: ax, py: ay + i * 2 });
-    }
-
-    let raf = 0;
-    let alpha = 0;
-    let sway = 0;
-    let grabbed = false;
-    let pointer = { x: -9999, y: -9999, active: false };
-    let lastTime = performance.now();
-
-    const toLocal = (clientX: number, clientY: number) => {
-      const rect = canvas.getBoundingClientRect();
-      return { x: clientX - rect.left, y: clientY - rect.top };
-    };
-
-    const onMove = (e: PointerEvent) => {
-      const p = toLocal(e.clientX, e.clientY);
-      pointer = { x: p.x, y: p.y, active: true };
-    };
-    const onDown = (e: PointerEvent) => {
-      const p = toLocal(e.clientX, e.clientY);
-      pointer = { x: p.x, y: p.y, active: true };
-      const card = pts[pts.length - 1];
-      if (Math.hypot(card.x - p.x, card.y - p.y) < GRAB_RADIUS) grabbed = true;
-    };
-    const onUp = () => {
-      grabbed = false;
-    };
-
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointerup", onUp);
-
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
-      const dt = Math.min((now - lastTime) / 16.7, 3);
-      lastTime = now;
-      sway += 0.03 * dt;
-
-      pts[0].x = ax;
-      pts[0].y = ay;
-
-      for (let i = 1; i < pts.length; i++) {
-        const p = pts[i];
-        const vx = (p.x - p.px) * DAMPING;
-        const vy = (p.y - p.py) * DAMPING;
-        p.px = p.x;
-        p.py = p.y;
-        p.x += vx;
-        p.y += vy + GRAVITY * dt * dt;
-      }
-
-      if (grabbed) {
-        const c = pts[pts.length - 1];
-        c.x += (pointer.x - c.x) * 0.32;
-        c.y += (pointer.y - c.y) * 0.32;
-      } else if (pointer.active) {
-        for (let i = 1; i < pts.length; i++) {
-          const p = pts[i];
-          const dx = p.x - pointer.x;
-          const dy = p.y - pointer.y;
-          const d = Math.hypot(dx, dy);
-          if (d < PUSH_RADIUS && d > 0.001) {
-            const f = PUSH_FORCE * (1 - d / PUSH_RADIUS);
-            p.x += (dx / d) * f * dt;
-            p.y += (dy / d) * f * dt;
-          }
-        }
-      }
-
-      for (let iter = 0; iter < 5; iter++) {
-        for (let i = 1; i < pts.length; i++) {
-          const a = pts[i - 1];
-          const b = pts[i];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const dist = Math.hypot(dx, dy) || 0.0001;
-          const diff = (dist - SEG_LEN) / dist;
-          const ox = dx * diff * 0.5;
-          const oy = dy * diff * 0.5;
-          if (i === 1) {
-            b.x -= ox * 2;
-            b.y -= oy * 2;
-          } else {
-            a.x += ox;
-            a.y += oy;
-            b.x -= ox;
-            b.y -= oy;
-          }
-        }
-      }
-
-      for (let i = 1; i < pts.length; i++) {
-        const p = pts[i];
-        if (p.x < 6) p.x = 6;
-        if (p.x > W - 6) p.x = W - 6;
-        if (p.y < 6) p.y = 6;
-        if (p.y > H - 6) p.y = H - 6;
-        p.x += Math.sin(sway + i * 0.55) * 0.07;
-      }
-
-      alpha += (1 - alpha) * 0.08;
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.shadowColor = "rgba(0,0,0,0.5)";
-      ctx.shadowBlur = 8;
-      drawStrap(ctx, pts);
-
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "#333";
-      ctx.fillRect(ax - 16, ay - 2, 32, 3);
-      ctx.fillStyle = "#fbbf24";
-      ctx.beginPath();
-      ctx.arc(ax, ay, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#0a0a0a";
-      ctx.beginPath();
-      ctx.arc(ax, ay, 1.4, 0, Math.PI * 2);
-      ctx.fill();
-
-      drawCard(ctx, pts[pts.length - 1], pts[pts.length - 2], configRef.current);
-      ctx.restore();
-    };
-    raf = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, []);
+  const [isMobile] = useState(() => window.innerWidth < 768);
+  const [reduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const count = isMobile ? LINKS_MOBILE : LINKS_DESKTOP;
+  const [linkRefs] = useState(() =>
+    Array.from({ length: LINKS_DESKTOP }, () => createRef<RapierRigidBody | null>())
+  );
+  const anchorRef = useRef<RapierRigidBody | null>(null);
+  const cardRef = useRef<RapierRigidBody | null>(null);
+  const draggingRef = useRef(false);
+  const pointerScreenRef = useRef({ x: 0, y: 0 });
+  const pointerActiveRef = useRef(false);
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      style={{
-        width: W,
-        height: H,
-        display: "block",
-        cursor: "grab",
-      }}
-    />
+    <Canvas
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      camera={{ position: [0, 0.2, 3.5], fov: 45 }}
+      gl={{ antialias: true, alpha: true }}
+      onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+      style={{ touchAction: "none", cursor: "grab", display: "block" }}
+    >
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[2.5, 3, 4]} intensity={1.1} />
+      <pointLight position={[-2, -1, 2]} intensity={1.6} color="#e11d48" />
+      {reduced ? (
+        <StaticLanyard config={config} count={count} />
+      ) : (
+        <Physics gravity={[0, -9.81, 0]}>
+          <AnchorClip anchorRef={anchorRef} />
+          {Array.from({ length: count }).map((_, i) => (
+            <ChainLink
+              key={i}
+              position={[0, ANCHOR_Y - i * SPACING - (CAPSULE_HALF + SPACING / 2), 0]}
+              bodyRef={linkRefs[i]}
+            />
+          ))}
+          <Card
+            config={config}
+            count={count}
+            cardRef={cardRef}
+            draggingRef={draggingRef}
+            pointerScreenRef={pointerScreenRef}
+          />
+          <ChainJoints anchorRef={anchorRef} refs={linkRefs} cardRef={cardRef} count={count} />
+          <Strap refs={linkRefs} cardRef={cardRef} count={count} />
+          <DragController
+            refs={linkRefs}
+            cardRef={cardRef}
+            draggingRef={draggingRef}
+            pointerScreenRef={pointerScreenRef}
+            pointerActiveRef={pointerActiveRef}
+          />
+        </Physics>
+      )}
+    </Canvas>
   );
 }
+
+
+

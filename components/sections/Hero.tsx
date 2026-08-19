@@ -1,16 +1,18 @@
 "use client";
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { GithubIcon, LinkedinIcon, InstagramIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
 import dynamic from "next/dynamic";
-import TiltCard from "@/components/ui/TiltCard";
 import Marquee from "@/components/ui/Marquee";
-import Lanyard from "@/components/ui/Lanyard";
 import type { Config } from "@/lib/types";
 
 const ParticleField = dynamic(() => import("@/components/three/ParticleField"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const Lanyard = dynamic(() => import("@/components/ui/Lanyard"), {
   ssr: false,
   loading: () => null,
 });
@@ -130,25 +132,6 @@ export default function Hero({ config }: { config: Config }) {
       >
         {config.riderNumber.replace("#", "")}
       </span>
-
-      {/* Hanging lanyard — pull it with the cursor */}
-      <motion.div
-        aria-hidden="true"
-        initial={{ opacity: 0, y: -40, rotate: -6 }}
-        animate={{ opacity: 1, y: 0, rotate: 0 }}
-        transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          position: "absolute",
-          top: "82px",
-          right: "clamp(0.5rem, 3vw, 3.5rem)",
-          width: 300,
-          height: 280,
-          zIndex: 3,
-          pointerEvents: "auto",
-        }}
-      >
-        <Lanyard config={config} />
-      </motion.div>
 
       <div className="container-custom" style={{ position: "relative", zIndex: 1, width: "100%" }}>
         <div
@@ -340,118 +323,53 @@ export default function Hero({ config }: { config: Config }) {
             </motion.div>
           </motion.div>
 
-          {/* Right — rider profile card with 3D tilt */}
+          {/* Right — hanging lanyard */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.5 }}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}
           >
-            {/* Checker strip above card */}
-            <div className="checker-big" style={{ width: "min(340px, 100%)", height: "14px", opacity: 0.9 }} />
-
-            <TiltCard
-              style={{
-                width: "100%",
-                maxWidth: "340px",
-              }}
-            >
+            <div style={{ width: "100%", maxWidth: 380 }}>
               <div
-                className="number-plate"
                 style={{
+                  position: "relative",
                   width: "100%",
-                  aspectRatio: "1 / 1",
+                  height: "clamp(380px, 52vw, 520px)",
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "1rem",
-                  overflow: "hidden",
                 }}
               >
                 <div
                   style={{
                     position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(135deg, rgba(225,29,72,0.08) 0%, transparent 60%)",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "15px",
-                    right: "20px",
-                    fontFamily: 'var(--font-orbitron), sans-serif',
-                    fontWeight: 900,
-                    fontSize: "clamp(2.5rem, 8vw, 3.5rem)",
-                    color: "rgba(255,255,255,0.03)",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {config.riderNumber}
-                </div>
-                <div
-                  style={{
-                    width: "clamp(100px, 25vw, 220px)",
-                    height: "clamp(100px, 25vw, 220px)",
-                    borderRadius: "50%",
-                    background: config.avatar ? "transparent" : "linear-gradient(135deg, var(--red) 0%, #7f1d1d 100%)",
+                    top: "14px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "min(180px, 60%)",
+                    height: "10px",
+                    background: "linear-gradient(180deg, #262626, #141414)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    borderBottom: "0 none",
                     display: "flex",
-                    alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "clamp(1.8rem, 5vw, 2.2rem)",
-                    fontFamily: 'var(--font-orbitron), sans-serif',
-                    fontWeight: 900,
-                    color: "#fff",
-                    border: "3px solid rgba(225,29,72,0.3)",
-                    boxShadow: "0 0 40px var(--red-glow)",
-                    position: "relative",
-                    zIndex: 1,
-                    overflow: "hidden",
+                    zIndex: 4,
+                    pointerEvents: "none",
                   }}
                 >
-                  {config.avatar ? (
-                    <Image
-                      src={config.avatar}
-                      alt={config.name}
-                      fill
-                      style={{ objectFit: "cover" }}
-                      sizes="220px"
-                    />
-                  ) : (
-                    "FI"
-                  )}
+                  <span
+                    style={{
+                      width: "2px",
+                      height: "12px",
+                      background: "var(--yellow)",
+                      display: "block",
+                      marginTop: "-1px",
+                    }}
+                  />
                 </div>
-                <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-                  <p style={{ fontFamily: 'var(--font-orbitron), sans-serif', fontWeight: 800, fontSize: "clamp(0.75rem, 2vw, 0.9rem)", letterSpacing: "0.05em" }}>
-                    {firstName.toUpperCase()}
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-ui)', fontSize: "clamp(0.55rem, 1.2vw, 0.65rem)", color: "var(--text-muted)", letterSpacing: "0.12em", marginTop: "0.25rem" }}>
-                    {config.role.toUpperCase()}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: "4px",
-                    background: "linear-gradient(90deg, var(--red), var(--yellow), var(--red))",
-                  }}
-                />
+                <Lanyard config={config} />
               </div>
-            </TiltCard>
-
-            {/* Yellow tape under card */}
-            <div className="stripes-gold" style={{ width: "min(340px, 100%)", height: "6px", marginTop: "2px", opacity: 0.9 }} />
-
-            <p
-              className="stamp"
-              style={{ color: "var(--red-light)", borderColor: "var(--border-red)", marginTop: "1.25rem", fontSize: "0.62rem" }}
-            >
-              RIDER #{config.riderNumber.replace("#", "")}
-            </p>
+            </div>
           </motion.div>
         </div>
       </div>
@@ -460,8 +378,6 @@ export default function Hero({ config }: { config: Config }) {
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
         <Marquee items={[...TICKER, config.riderNumber]} variant="red" />
       </div>
-
-      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
     </section>
   );
 }
