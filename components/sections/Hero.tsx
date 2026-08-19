@@ -5,6 +5,9 @@ import { GithubIcon, LinkedinIcon, InstagramIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 import Marquee from "@/components/ui/Marquee";
+import SplitText from "@/components/reactbits/SplitText";
+import Magnet from "@/components/reactbits/Magnet";
+import CountUp from "@/components/reactbits/CountUp";
 import type { Config } from "@/lib/types";
 
 const ParticleField = dynamic(() => import("@/components/three/ParticleField"), {
@@ -226,24 +229,36 @@ export default function Hero({ config }: { config: Config }) {
             </motion.div>
 
             {/* Tagline */}
-            <motion.p
+            <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.15rem)", color: "var(--text-secondary)", fontWeight: 400, maxWidth: "480px", marginBottom: "2rem", lineHeight: 1.6 }}
+              style={{ marginBottom: "2rem" }}
             >
-              {config.tagline}
-            </motion.p>
+              <SplitText
+                text={config.tagline}
+                tag="p"
+                delay={12}
+                duration={0.9}
+                threshold={0.2}
+                textAlign="left"
+                className="hero-tagline"
+              />
+            </motion.div>
 
             {/* CTAs */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
               style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "clamp(1.75rem, 4vw, 2.5rem)" }}
             >
-              <a href="#projects" className="btn btn-primary">
-                VIEW PROJECTS
-              </a>
-              <a href="#contact" className="btn btn-outline">
-                GET IN TOUCH
-              </a>
+              <Magnet padding={60} magnetStrength={3} activeTransition="transform 0.2s ease-out">
+                <a href="#projects" className="btn btn-primary">
+                  VIEW PROJECTS
+                </a>
+              </Magnet>
+              <Magnet padding={60} magnetStrength={3} activeTransition="transform 0.2s ease-out">
+                <a href="#contact" className="btn btn-outline">
+                  GET IN TOUCH
+                </a>
+              </Magnet>
             </motion.div>
 
             {/* Stats — decal tiles */}
@@ -251,49 +266,57 @@ export default function Hero({ config }: { config: Config }) {
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
               style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginBottom: "1.75rem" }}
             >
-              {config.stats.map((s, i) => (
-                <div
-                  key={s.label}
-                  className="sticker"
-                  style={{
-                    background: i === 1 ? "var(--yellow)" : "var(--bg-card)",
-                    border: i === 1 ? "2px solid var(--yellow)" : "1px solid var(--border)",
-                    color: i === 1 ? "#0a0a0a" : "var(--text-primary)",
-                    padding: "0.7rem 1.1rem",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: "0.15rem",
-                    transform: i % 2 === 0 ? "rotate(-1.5deg)" : "rotate(1.2deg)",
-                  }}
-                >
-                  <span
+              {config.stats.map((s, i) => {
+                const match = s.value.match(/^(\d+(?:\.\d+)?)(.*)$/);
+                const num = match ? parseFloat(match[1]) : 0;
+                const suffix = match ? match[2] : "";
+                return (
+                  <div
+                    key={s.label}
+                    className="sticker"
                     style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      opacity: i === 1 ? 0.75 : 0.6,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.35rem",
+                      background: i === 1 ? "var(--yellow)" : "var(--bg-card)",
+                      border: i === 1 ? "2px solid var(--yellow)" : "1px solid var(--border)",
+                      color: i === 1 ? "#0a0a0a" : "var(--text-primary)",
+                      padding: "0.7rem 1.1rem",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "0.15rem",
+                      transform: i % 2 === 0 ? "rotate(-1.5deg)" : "rotate(1.2deg)",
                     }}
                   >
-                    {s.icon} {s.label}
-                  </span>
-                  <span
-                    className="tabular-nums"
-                    style={{
-                      fontFamily: 'var(--font-orbitron), sans-serif',
-                      fontWeight: 800,
-                      fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
-                      letterSpacing: "0.03em",
-                      color: i === 1 ? "#0a0a0a" : "var(--red-light)",
-                    }}
-                  >
-                    {s.value}
-                  </span>
-                </div>
-              ))}
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-ui)',
+                        fontSize: "0.55rem",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        opacity: i === 1 ? 0.75 : 0.6,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                      }}
+                    >
+                      {s.icon} {s.label}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-orbitron), sans-serif',
+                        fontWeight: 800,
+                        fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+                        letterSpacing: "0.03em",
+                        color: i === 1 ? "#0a0a0a" : "var(--red-light)",
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: "0.15rem",
+                      }}
+                    >
+                      <CountUp to={num} duration={1.4} className="tabular-nums" />
+                      {suffix && <span style={{ fontSize: "0.55em" }}>{suffix}</span>}
+                    </span>
+                  </div>
+                );
+              })}
             </motion.div>
 
             {/* Social icons */}
@@ -301,14 +324,14 @@ export default function Hero({ config }: { config: Config }) {
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
               style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}
             >
-              {[
-                { href: config.social.github, icon: <GithubIcon size={17} />, label: "GitHub" },
-                { href: config.social.linkedin, icon: <LinkedinIcon size={17} />, label: "LinkedIn" },
-                { href: config.social.instagram, icon: <InstagramIcon size={17} />, label: "Instagram" },
-                { href: `mailto:${config.email}`, icon: <Mail size={17} />, label: "Email" },
-              ].map((s, i) => (
+{[
+              { href: config.social.github, icon: <GithubIcon size={17} />, label: "GitHub" },
+              { href: config.social.linkedin, icon: <LinkedinIcon size={17} />, label: "LinkedIn" },
+              { href: config.social.instagram, icon: <InstagramIcon size={17} />, label: "Instagram" },
+              { href: `mailto:${config.email}`, icon: <Mail size={17} />, label: "Email" },
+            ].map((s, i) => (
+              <Magnet key={s.label} padding={70} magnetStrength={4} activeTransition="transform 0.2s ease-out">
                 <a
-                  key={i}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -319,7 +342,8 @@ export default function Hero({ config }: { config: Config }) {
                   {s.icon}
                   <span>{s.label}</span>
                 </a>
-              ))}
+              </Magnet>
+            ))}
             </motion.div>
           </motion.div>
 
