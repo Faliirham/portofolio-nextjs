@@ -10,11 +10,37 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const SITE_URL = "https://faliirham.pages.dev";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = getProjects().find((p) => p.slug === slug);
   if (!project) return { title: "Not Found" };
-  return { title: `${project.title} — ${getConfig().name}`, description: project.shortDesc };
+  const name = getConfig().name;
+  return {
+    title: `${project.title} — ${name}`,
+    description: project.shortDesc,
+    alternates: {
+      canonical: `${SITE_URL}/projects/${project.slug}`,
+    },
+    openGraph: {
+      title: `${project.title} — ${name}`,
+      description: project.shortDesc,
+      url: `${SITE_URL}/projects/${project.slug}`,
+      siteName: name,
+      type: "article",
+      images: project.image
+        ? [
+            {
+              url: project.image,
+              width: 1200,
+              height: 630,
+              alt: project.title,
+            },
+          ]
+        : undefined,
+    },
+  };
 }
 
 export function generateStaticParams() {

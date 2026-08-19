@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getProjects } from "@/lib/content";
 
 export const dynamic = "force-static";
 
@@ -12,29 +13,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
-    {
-      url: `${BASE_URL}/projects/finwise`,
+    ...getProjects().map((p) => ({
+      url: `${BASE_URL}/projects/${p.slug}`,
       lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/projects/tollytics`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/projects/jawara`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/projects/simpera`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.6,
-    },
+      changeFrequency: "yearly" as const,
+      priority: p.featured ? 0.8 : 0.6,
+    })),
   ];
 }
