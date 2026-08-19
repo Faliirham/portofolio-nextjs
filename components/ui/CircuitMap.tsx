@@ -276,15 +276,27 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
                       >
                         T{hoveredIndex + 1} · {hoveredProject.title}
                       </span>
-                      <span
-                        style={{
-                          width: "9px",
-                          height: "9px",
-                          background: hoveredProject.status === "finished" ? "var(--yellow)" : STATUS_CONFIG[hoveredProject.status].color,
-                          boxShadow: `0 0 8px ${hoveredProject.status === "finished" ? "var(--yellow)" : STATUS_CONFIG[hoveredProject.status].color}`,
-                          flexShrink: 0,
-                        }}
-                      />
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", flexShrink: 0 }}>
+                        <span
+                          style={{
+                            width: "9px",
+                            height: "9px",
+                            background: hoveredProject.status === "finished" ? "var(--yellow)" : STATUS_CONFIG[hoveredProject.status].color,
+                            boxShadow: `0 0 8px ${hoveredProject.status === "finished" ? "var(--yellow)" : STATUS_CONFIG[hoveredProject.status].color}`,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-ui)',
+                            fontSize: "0.5rem",
+                            fontWeight: 800,
+                            letterSpacing: "0.08em",
+                            color: hoveredProject.status === "finished" ? "var(--yellow)" : STATUS_CONFIG[hoveredProject.status].color,
+                          }}
+                        >
+                          {STATUS_CONFIG[hoveredProject.status].label}
+                        </span>
+                      </span>
                     </div>
                     <p
                       style={{
@@ -376,10 +388,12 @@ export default function CircuitMap({ projects }: { projects: Project[] }) {
       </div>
 
       <style>{`
-        .cm-map-scroll { overflow-x: auto; scrollbar-width: thin; }
+        .cm-map-scroll { overflow-x: visible; }
         .cm-map-inner { min-width: 100%; }
         .cm-chip { width: 38px; height: 38px; }
         @media (max-width: 767px) {
+          .cm-map-scroll { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+          .cm-map-scroll::-webkit-scrollbar { display: none; }
           .cm-map-inner { min-width: 540px; }
           .cm-chip { width: 30px; height: 30px; }
           .cm-chip > span { font-size: 0.55rem; }
