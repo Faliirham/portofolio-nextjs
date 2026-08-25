@@ -5,17 +5,13 @@ import { GithubIcon, LinkedinIcon, InstagramIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 import Marquee from "@/components/ui/Marquee";
+import ProfileCard from "@/components/ProfileCard";
 import SplitText from "@/components/reactbits/SplitText";
 import Magnet from "@/components/reactbits/Magnet";
 import CountUp from "@/components/reactbits/CountUp";
 import type { Config } from "@/lib/types";
 
 const ParticleField = dynamic(() => import("@/components/three/ParticleField"), {
-  ssr: false,
-  loading: () => null,
-});
-
-const Lanyard = dynamic(() => import("@/components/ui/Lanyard"), {
   ssr: false,
   loading: () => null,
 });
@@ -139,7 +135,7 @@ export default function Hero({ config }: { config: Config }) {
       <div className="container-custom" style={{ position: "relative", zIndex: 1, width: "100%" }}>
         <div
           style={{ display: "grid", gap: "clamp(2rem, 5vw, 3rem)", alignItems: "center" }}
-          className="lg:grid-cols-[1fr_380px]"
+          className="grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_380px]"
         >
           {/* Left */}
           <motion.div
@@ -347,55 +343,32 @@ export default function Hero({ config }: { config: Config }) {
             </motion.div>
           </motion.div>
 
-          {/* Right — hanging lanyard */}
+          {/* Right — interactive profile card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.5 }}
-            className="hero-lanyard-col"
+            className="hero-profile-col"
             style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}
           >
-            <div style={{ width: "100%", maxWidth: 380 }}>
-              <div
-                className="hero-lanyard-frame"
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "clamp(380px, 52vw, 520px)",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "14px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "min(180px, 60%)",
-                    height: "10px",
-                    background: "linear-gradient(180deg, #262626, #141414)",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    borderBottom: "0 none",
-                    display: "flex",
-                    justifyContent: "center",
-                    zIndex: 4,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: "2px",
-                      height: "12px",
-                      background: "var(--yellow)",
-                      display: "block",
-                      marginTop: "-1px",
-                    }}
-                  />
-                </div>
-                <div style={{ position: "absolute", inset: 0, zIndex: 2 }}>
-                  <Lanyard config={config} />
-                </div>
-              </div>
-            </div>
+            <ProfileCard
+              avatarUrl={config.avatar}
+              miniAvatarUrl={config.avatar}
+              name={config.name}
+              title={config.role}
+              handle={config.social.github.split("/").filter(Boolean).pop() || config.name}
+              status={config.availableForWork ? "Open to Work" : "Busy"}
+              contactText="GET IN TOUCH"
+              showUserInfo
+              enableTilt
+              innerGradient="linear-gradient(145deg, rgba(225,29,72,0.55) 0%, rgba(17,17,17,0.92) 55%, rgba(251,191,36,0.22) 100%)"
+              behindGlowColor="rgba(225, 29, 72, 0.45)"
+              behindGlowSize="55%"
+              className="hero-profile-card"
+              onContactClick={() =>
+                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+              }
+            />
           </motion.div>
         </div>
       </div>

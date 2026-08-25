@@ -8,10 +8,13 @@ interface TrailDot {
   opacity: number;
 }
 
+/* Module-level monotonic id — survives remounts/Fast Refresh and stays
+   unique even when React double-invokes the state updater in dev. */
+let trailId = 0;
+
 export default function CursorTrail() {
   const [dots, setDots] = useState<TrailDot[]>([]);
   const [isMobile, setIsMobile] = useState(true);
-  const idCounter = useRef(0);
   const lastPos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -34,7 +37,6 @@ export default function CursorTrail() {
       if (dist < 8) return;
 
       lastPos.current = { x: e.clientX, y: e.clientY };
-      idCounter.current += 1;
 
       setDots((prev) => {
         const newDots = [
@@ -42,7 +44,7 @@ export default function CursorTrail() {
           {
             x: e.clientX,
             y: e.clientY,
-            id: idCounter.current,
+            id: ++trailId,
             opacity: 1,
           },
         ];

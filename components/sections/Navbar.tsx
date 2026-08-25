@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import type { Config } from "@/lib/types";
@@ -20,6 +20,7 @@ export default function Navbar({ config }: { config: Config }) {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -39,6 +40,49 @@ export default function Navbar({ config }: { config: Config }) {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
+  }, []);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  /* Lock body scroll while the mobile menu is open */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
+  /* Escape key closes the menu */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen, closeMenu]);
+
+  /* Tap outside the panel closes it */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-mobile-menu]")) closeMenu();
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, [menuOpen, closeMenu]);
+
+  /* Reset when resizing up to desktop */
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => {
+      if (mq.matches) setMenuOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   return (
@@ -74,14 +118,19 @@ export default function Navbar({ config }: { config: Config }) {
           }}
         >
           {/* Logo */}
-          <a href="#hero" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <a
+            href="#hero"
+            onClick={closeMenu}
+            style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.4rem", minWidth: 0 }}
+          >
             <span
               style={{
                 fontFamily: 'var(--font-orbitron), sans-serif',
                 fontWeight: 900,
-                fontSize: "1.05rem",
+                fontSize: "clamp(0.9rem, 4vw, 1.05rem)",
                 color: "#f5f5f5",
                 letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
               }}
             >
               {config.name.split(" ")[0].toUpperCase()}
@@ -96,6 +145,7 @@ export default function Navbar({ config }: { config: Config }) {
                 padding: "0.1rem 0.35rem",
                 borderRadius: "2px",
                 letterSpacing: "0.08em",
+                flexShrink: 0,
               }}
             >
               {config.riderNumber}
@@ -150,18 +200,23 @@ export default function Navbar({ config }: { config: Config }) {
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
               style={{
                 background: "none",
                 border: "none",
                 color: "var(--text-primary)",
                 cursor: "pointer",
                 padding: "0.75rem",
+                margin: "-0.75rem",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                minWidth: "44px",
+                minHeight: "44px",
               }}
             >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
@@ -171,6 +226,9 @@ export default function Navbar({ config }: { config: Config }) {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            key="mobile-menu"
+            data-mobile-menu
+            id="mobile-menu"
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
@@ -180,38 +238,48 @@ export default function Navbar({ config }: { config: Config }) {
               top: "64px",
               left: 0,
               right: 0,
-              background: "rgba(10,10,10,0.97)",
+              maxHeight: "calc(100dvh - 64px)",
+              overflowY: "auto",
+              background: "rgba(10,10,10,0.98)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               borderBottom: "1px solid var(--border)",
               zIndex: 99,
-              padding: "1.5rem",
+              padding: "1.25rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom))",
               display: "flex",
               flexDirection: "column",
-              gap: "1.25rem",
+              gap: "0.35rem",
             }}
           >
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
-                onClick={() => setMenuOpen(false)}
-                className="nav-link"
+                onClick={closeMenu}
+                className={`nav-link${active === l.href ? " is-active" : ""}`}
                 style={{
                   textDecoration: "none",
-                  fontSize: "0.8rem",
+                  fontSize: "0.85rem",
                   fontFamily: 'var(--font-ui)',
                   fontWeight: 500,
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
-                  padding: "0.35rem 0",
+                  padding: "0.8rem 0.25rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
                 {l.label}
+                <span style={{ color: "var(--red)", fontSize: "0.7rem" }}>◆</span>
               </a>
             ))}
             <a
               href="#contact"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
               className="btn btn-primary btn-block"
+              style={{ marginTop: "1rem", minHeight: "44px" }}
             >
               Hire Me
             </a>

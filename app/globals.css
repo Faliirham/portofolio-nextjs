@@ -734,18 +734,36 @@ p {
   }
 }
 
-/* Hero lanyard — mobile height limit */
-.hero-lanyard-frame {
-  position: relative;
-  width: 100%;
-  height: clamp(340px, 52vw, 520px);
+/* Hero profile card (ReactBits ProfileCard) — brutal square theme override */
+.hero-profile-card {
+  --card-radius: 0px;
+  width: min(100%, 373px);
 }
+
+.hero-profile-card .pc-card {
+  height: auto;
+  width: 100%;
+  max-height: none;
+  border: 1px solid var(--border);
+}
+
+.hero-profile-card .pc-details h3 {
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-profile-card .pc-contact-btn {
+  font-family: var(--font-orbitron), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 767px) {
-  .hero-lanyard-frame {
-    max-height: 360px;
-  }
-  .hero-lanyard-col {
-    max-width: 320px;
+  .hero-profile-col {
+    width: 100%;
+    max-width: 340px;
     margin: 0 auto;
   }
 }
