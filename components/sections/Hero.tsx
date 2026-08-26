@@ -31,6 +31,14 @@ const TICKER = [
   "Cloudflare",
 ];
 
+/* Lightning-bolt pattern revealed through the card's holographic shine */
+const PROFILE_ICON_PATTERN = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><path fill="#ffffff" d="M70 6 L26 66 L50 66 L42 114 L94 48 L64 48 Z"/></svg>'
+)
+  .replace(/'/g, "%27")
+  .replace(/\(/g, "%28")
+  .replace(/\)/g, "%29")}`;
+
 export default function Hero({ config }: { config: Config }) {
   const nameRef = useRef<HTMLHeadingElement>(null);
 
@@ -149,7 +157,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* Status badge */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ marginBottom: "1.75rem" }}
+              style={{ marginBottom: "var(--gap-lg)" }}
             >
               <span
                 style={{
@@ -180,7 +188,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* Name — giant brutal stack */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ marginBottom: "1.5rem" }}
+              style={{ marginBottom: "var(--gap-md)" }}
             >
               <h1
                 ref={nameRef}
@@ -207,7 +215,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* Role — red tape + label */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.75rem", flexWrap: "wrap" }}
+              style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "var(--gap-lg)", flexWrap: "wrap" }}
             >
               <div className="tape-line" style={{ width: "3.5rem", flexShrink: 0 }} />
               <span
@@ -243,7 +251,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* CTAs */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "clamp(1.75rem, 4vw, 2.5rem)" }}
+              style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "clamp(2rem, 4vw, 2.5rem)" }}
             >
               <Magnet padding={60} magnetStrength={3} activeTransition="transform 0.2s ease-out">
                 <a href="#projects" className="btn btn-primary">
@@ -260,7 +268,7 @@ export default function Hero({ config }: { config: Config }) {
             {/* Stats — decal tiles */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-              style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginBottom: "1.75rem" }}
+              style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginBottom: "var(--gap-lg)" }}
             >
               {config.stats.map((s, i) => {
                 const match = s.value.match(/^(\d+(?:\.\d+)?)(.*)$/);
@@ -354,6 +362,7 @@ export default function Hero({ config }: { config: Config }) {
             <ProfileCard
               avatarUrl={config.avatar}
               miniAvatarUrl={config.avatar}
+              iconUrl={PROFILE_ICON_PATTERN}
               name={config.name}
               title={config.role}
               handle={config.social.github.split("/").filter(Boolean).pop() || config.name}

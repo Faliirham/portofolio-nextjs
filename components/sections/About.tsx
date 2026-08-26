@@ -85,7 +85,7 @@ export default function About({ section, config }: { section: AboutSection; conf
 
           {/* Right — visual block */}
           <AnimatedSection delay={0.15}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "clamp(0.9rem, 2vw, 1.25rem)" }}>
               {section.image && (
                 <div style={{ position: "relative", marginBottom: "clamp(1.2rem, 3vw, 1.75rem)" }}>
                   {/* Offset frame */}
@@ -214,7 +214,6 @@ export default function About({ section, config }: { section: AboutSection; conf
                   border: "1px solid var(--border)",
                   padding: "clamp(1.4rem, 3vw, 2rem)",
                   transform: "rotate(-0.75deg)",
-                  marginTop: "2px",
                 }}
               >
                 <span
@@ -255,7 +254,6 @@ export default function About({ section, config }: { section: AboutSection; conf
                 style={{
                   border: "1px solid var(--border)",
                   padding: "clamp(1.2rem, 3vw, 1.75rem)",
-                  marginTop: "1px",
                 }}
               >
                 <p

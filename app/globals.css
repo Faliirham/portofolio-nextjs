@@ -19,6 +19,10 @@
   --carbon-1: #111111;
   --carbon-2: #0d0d0d;
   --font-ui: var(--font-grotesk), system-ui, sans-serif;
+  --gap-xs: 0.5rem;
+  --gap-sm: 0.75rem;
+  --gap-md: 1.25rem;
+  --gap-lg: 2rem;
 }
 
 * {
@@ -472,7 +476,7 @@ p {
 /* Scroll rail (horizontal certs) */
 .scroll-rail {
   display: flex;
-  gap: 1px;
+  gap: var(--gap-sm);
   overflow-x: auto;
   padding-bottom: 0.75rem;
   scrollbar-width: thin;

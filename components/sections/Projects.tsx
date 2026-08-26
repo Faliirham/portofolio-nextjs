@@ -9,11 +9,12 @@ import { AnimatedSection, SectionHeading } from "@/components/ui";
 import CircuitMap from "@/components/ui/CircuitMap";
 import type { Project } from "@/lib/types";
 import { STATUS_CONFIG } from "@/lib/types";
+import { sortProjectsForDisplay } from "@/lib/projects";
 
 const LOAD_MORE_COUNT = 4;
 
 export default function Projects({ projects }: { projects: Project[] }) {
-  const sorted = [...projects].sort((a, b) => a.position - b.position);
+  const sorted = sortProjectsForDisplay(projects);
   const [showCount, setShowCount] = useState(3);
   const initial = sorted.slice(0, 3);
   const appended = sorted.slice(3, showCount);
@@ -51,13 +52,13 @@ export default function Projects({ projects }: { projects: Project[] }) {
         </AnimatedSection>
 
         {/* 3D circuit map — one full lap */}
-        <div style={{ marginBottom: "clamp(2.5rem, 6vw, 4rem)" }}>
+        <div style={{ marginBottom: "clamp(1.25rem, 3vw, 2rem)" }}>
           <CircuitMap projects={sorted} />
         </div>
 
         {/* Start grid */}
         <AnimatedSection>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "clamp(2rem, 5vw, 3rem)" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "clamp(1.5rem, 3vw, 2.25rem)" }}>
             <div
               style={{
                 display: "inline-flex",
@@ -101,7 +102,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
             const statusCfg = STATUS_CONFIG[project.status];
             return (
               <div key={project.slug} data-circuit-row id={`row-${project.slug}`} style={{ scrollMarginTop: "90px" }}>
-                {/* Sector label (between corners) */}
+                {/* Corner label (between corners) */}
                 {i > 0 && (
                   <div className="sector-label">
                     <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
@@ -116,7 +117,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      Sector {String(i + 1).padStart(2, "0")}
+                      Corner {String(i + 1).padStart(2, "0")}
                     </span>
                     <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
                   </div>
@@ -223,6 +224,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
+                            aria-label={`View ${project.title} source code on GitHub`}
+                            title="GitHub"
                             onClick={(e) => e.stopPropagation()}
                             style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
                             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
@@ -234,6 +237,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
                             href={project.live}
                             target="_blank"
                             rel="noopener noreferrer"
+                            aria-label={`Open ${project.title} live demo`}
+                            title="Live demo"
                             onClick={(e) => e.stopPropagation()}
                             style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}
                             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--red-light)")}
@@ -252,7 +257,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                           gap: "0.35rem",
                           background: statusCfg.bg,
                           border: `1px solid ${statusCfg.border}`,
-                          padding: "0.25rem 0.6rem",
+                          padding: "0.3rem 0.65rem",
                           alignSelf: "flex-start",
                         }}
                       >
@@ -268,7 +273,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         <span
                           style={{
                             fontFamily: 'var(--font-ui)',
-                            fontSize: "clamp(0.44rem, 0.8vw, 0.54rem)",
+                            fontSize: "clamp(0.6rem, 0.9vw, 0.68rem)",
                             fontWeight: 800,
                             letterSpacing: "0.12em",
                             color: statusCfg.color,
@@ -282,7 +287,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         {project.shortDesc}
                       </p>
 
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--gap-xs)" }}>
                         {project.tech.map((t) => (
                           <span
                             key={t}
@@ -291,11 +296,11 @@ export default function Projects({ projects }: { projects: Project[] }) {
                               background: "var(--red-dim)",
                               border: "1px solid var(--border-red)",
                               color: "var(--red-light)",
-                              fontSize: "clamp(0.5rem, 1vw, 0.6rem)",
+                              fontSize: "clamp(0.62rem, 1vw, 0.7rem)",
                               fontFamily: 'var(--font-ui)',
                               fontWeight: 500,
                               letterSpacing: "0.04em",
-                              padding: "0.2rem 0.5rem",
+                              padding: "0.28rem 0.6rem",
                             }}
                           >
                             {t}
@@ -338,7 +343,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
         {/* Load More button */}
         {hasMore && (
           <AnimatedSection>
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(1rem, 3vw, 2rem)" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(2rem, 4vw, 2.75rem)" }}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -419,16 +424,7 @@ function CircuitRow({
       id={`row-${project.slug}`}
       style={{ scrollMarginTop: "90px" }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.75rem",
-          margin: "0.25rem 0 2rem",
-          paddingLeft: "clamp(2rem, 6vw, 4rem)",
-        }}
-        className="md:px-0"
-      >
+      <div className="sector-label">
         <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
         <span
           style={{
@@ -441,22 +437,13 @@ function CircuitRow({
             whiteSpace: "nowrap",
           }}
         >
-          Sector {String(corner).padStart(2, "0")}
+          Corner {String(corner).padStart(2, "0")}
         </span>
         <span style={{ flex: 1, borderTop: "1px dashed rgba(225,29,72,0.4)" }} />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "clamp(46px, 12vw, 56px) 1fr",
-          gap: "clamp(0.6rem, 2vw, 1rem)",
-          alignItems: "center",
-          marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
-        }}
-        className="md:grid-cols-[1fr_72px_1fr] md:gap-10"
-      >
-        <div style={{ gridColumn: "1", gridRow: "1", justifySelf: "center", position: "relative", zIndex: 1 }} className="md:col-start-2">
+      <div className="circuit-row-grid">
+        <div className="circuit-node">
           <div style={{ position: "relative", width: "52px", height: "52px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div
               style={{
@@ -497,7 +484,7 @@ function CircuitRow({
           </p>
         </div>
 
-        <div style={{ gridColumn: "2", gridRow: "1" }} className={even ? "md:col-start-1" : "md:col-start-3"}>
+        <div className={even ? "circuit-card circuit-card--even" : "circuit-card circuit-card--odd"}>
           <div
             className="card-brutal"
             style={{ padding: "clamp(1.1rem, 2.5vw, 1.5rem)", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", overflow: "hidden" }}
@@ -537,10 +524,10 @@ function CircuitRow({
                 {project.title}
               </h3>
               <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-                <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
+                <a href={project.github} target="_blank" rel="noopener noreferrer" aria-label={`View ${project.title} source code on GitHub`} title="GitHub" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
                   <GithubIcon size={14} />
                 </a>
-                <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
+                <a href={project.live} target="_blank" rel="noopener noreferrer" aria-label={`Open ${project.title} live demo`} title="Live demo" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)", transition: "color 0.2s", display: "flex" }}>
                   <ExternalLink size={14} />
                 </a>
               </div>
@@ -552,19 +539,19 @@ function CircuitRow({
                 gap: "0.35rem",
                 background: statusCfg.bg,
                 border: `1px solid ${statusCfg.border}`,
-                padding: "0.25rem 0.6rem",
+                padding: "0.3rem 0.65rem",
                 alignSelf: "flex-start",
               }}
             >
               <span style={{ width: "7px", height: "7px", background: statusCfg.color, boxShadow: `0 0 6px ${statusCfg.color}66` }} />
-              <span style={{ fontFamily: 'var(--font-ui)', fontSize: "clamp(0.44rem, 0.8vw, 0.54rem)", fontWeight: 800, letterSpacing: "0.12em", color: statusCfg.color }}>
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: "clamp(0.6rem, 0.9vw, 0.68rem)", fontWeight: 800, letterSpacing: "0.12em", color: statusCfg.color }}>
                 {statusCfg.label}
               </span>
             </div>
             <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.75rem, 1.3vw, 0.84rem)", lineHeight: 1.6, flex: 1 }}>
               {project.shortDesc}
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--gap-xs)" }}>
               {project.tech.map((t) => (
                 <span
                   key={t}
@@ -573,11 +560,11 @@ function CircuitRow({
                     background: "var(--red-dim)",
                     border: "1px solid var(--border-red)",
                     color: "var(--red-light)",
-                    fontSize: "clamp(0.5rem, 1vw, 0.6rem)",
+                    fontSize: "clamp(0.62rem, 1vw, 0.7rem)",
                     fontFamily: 'var(--font-ui)',
                     fontWeight: 500,
                     letterSpacing: "0.04em",
-                    padding: "0.2rem 0.5rem",
+                    padding: "0.28rem 0.6rem",
                   }}
                 >
                   {t}

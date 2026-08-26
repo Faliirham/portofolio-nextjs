@@ -6,6 +6,7 @@ import type { SkillsSection } from "@/lib/types";
 
 export default function Skills({ section }: { section: SkillsSection }) {
   const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState<number | null>(null);
   const [auto, setAuto] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const group = section.categories[active];
@@ -41,7 +42,6 @@ export default function Skills({ section }: { section: SkillsSection }) {
       style={{
         background: "var(--bg-secondary)",
         borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
       }}
     >
       <div className="container-custom">
@@ -117,10 +117,12 @@ export default function Skills({ section }: { section: SkillsSection }) {
             <div style={{ borderTop: "1px solid var(--border)" }}>
               {section.categories.map((cat, i) => {
                 const isActive = active === i;
+                const lit = isActive || hovered === i;
                 return (
                   <button
                     key={cat.name}
                     onClick={() => select(i)}
+                    aria-pressed={isActive}
                     style={{
                       width: "100%",
                       background: "transparent",
@@ -134,9 +136,12 @@ export default function Skills({ section }: { section: SkillsSection }) {
                       textAlign: "left",
                       position: "relative",
                       transition: "background 0.25s ease, color 0.25s ease",
-                      color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                      color: lit ? "var(--text-primary)" : "var(--text-muted)",
                     }}
-                    onMouseEnter={() => select(i)}
+                    onMouseEnter={() => setHovered(i)}
+                    onMouseLeave={() => setHovered(null)}
+                    onFocus={() => setHovered(i)}
+                    onBlur={() => setHovered(null)}
                   >
                     <span
                       className="tabular-nums"
@@ -144,8 +149,8 @@ export default function Skills({ section }: { section: SkillsSection }) {
                         fontFamily: 'var(--font-orbitron), sans-serif',
                         fontWeight: 900,
                         fontSize: "clamp(1rem, 2.5vw, 1.4rem)",
-                        color: isActive ? cat.color : "transparent",
-                        WebkitTextStroke: isActive ? "0px" : "1px rgba(255,255,255,0.2)",
+                        color: lit ? cat.color : "transparent",
+                        WebkitTextStroke: lit ? "0px" : "1px rgba(255,255,255,0.2)",
                       }}
                     >
                       {String(i + 1).padStart(2, "0")}

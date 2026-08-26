@@ -12,7 +12,13 @@ const links = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar({ config }: { config: Config }) {
+export default function Navbar({
+  config,
+  anchorBase = "",
+}: {
+  config: Config;
+  anchorBase?: string;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -43,6 +49,8 @@ export default function Navbar({ config }: { config: Config }) {
   }, []);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  const navLinks = links.map((l) => ({ ...l, href: `${anchorBase}${l.href}` }));
 
   /* Lock body scroll while the mobile menu is open */
   useEffect(() => {
@@ -119,7 +127,7 @@ export default function Navbar({ config }: { config: Config }) {
         >
           {/* Logo */}
           <a
-            href="#hero"
+            href={anchorBase || "/"}
             onClick={closeMenu}
             style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.4rem", minWidth: 0 }}
           >
@@ -154,7 +162,7 @@ export default function Navbar({ config }: { config: Config }) {
 
           {/* Desktop nav */}
           <nav style={{ alignItems: "center", gap: "1.25rem" }} className="hidden lg:flex">
-            {links.map((l) => (
+            {navLinks.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
@@ -188,7 +196,7 @@ export default function Navbar({ config }: { config: Config }) {
             ))}
 
             <a
-              href="#contact"
+              href={`${anchorBase}#contact`}
               className="btn btn-primary btn-sm"
             >
               Hire Me
@@ -251,7 +259,7 @@ export default function Navbar({ config }: { config: Config }) {
               gap: "0.35rem",
             }}
           >
-            {links.map((l) => (
+            {navLinks.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
@@ -276,7 +284,7 @@ export default function Navbar({ config }: { config: Config }) {
               </a>
             ))}
             <a
-              href="#contact"
+              href={`${anchorBase}#contact`}
               onClick={closeMenu}
               className="btn btn-primary btn-block"
               style={{ marginTop: "1rem", minHeight: "44px" }}

@@ -40,7 +40,7 @@ export default function Contact({ section, config }: { section: ContactSection; 
     icon: iconMap[c.icon] || <Mail size={18} />,
   }));
   return (
-    <section id="contact" className="section-py" style={{ background: "var(--bg-secondary)", borderTop: "1px solid var(--border)", paddingBottom: "clamp(2rem, 5vw, 5rem)" }}>
+    <section id="contact" className="section-py" style={{ background: "var(--bg-secondary)", paddingBottom: "clamp(2rem, 5vw, 5rem)" }}>
       <div className="container-custom">
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "clamp(2rem, 5vw, 4rem)" }} className="lg:grid-cols-[1fr_1.2fr]">
           {/* Left */}
@@ -92,7 +92,7 @@ export default function Contact({ section, config }: { section: ContactSection; 
 
           {/* Right */}
           <AnimatedSection delay={0.12}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap-sm)" }}>
               {contacts.map((c, i) => (
                 <motion.a key={c.label} href={c.href} target="_blank" rel="noopener noreferrer"
                   initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}

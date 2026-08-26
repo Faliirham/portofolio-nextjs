@@ -16,7 +16,6 @@ export default function Experience({ section }: { section: ExperienceSection }) 
       style={{
         background: "var(--bg-secondary)",
         borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
       }}
     >
       <div className="container-custom">
